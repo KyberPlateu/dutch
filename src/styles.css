@@ -1,0 +1,41 @@
+@import '@angular/material/prebuilt-themes/azure-blue.css';
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/inter/800.css';
+@import 'material-icons/iconfont/material-icons.css';
+@import 'tailwindcss';
+
+:root {
+  --dutch-primary: #0047ab;
+  --dutch-primary-soft: #e8f2ff;
+  --dutch-positive: #10b981;
+  --dutch-negative: #ef4444;
+  --dutch-pending: #f59e0b;
+  --dutch-surface: #ffffff;
+  --dutch-page: #f5f7fa;
+  --dutch-border: #e5eaf0;
+  --dutch-text: #111827;
+  --dutch-muted: #6b7280;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--dutch-page);
+  color: var(--dutch-text);
+  font-family:
+    Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
