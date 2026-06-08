@@ -38,318 +38,8 @@ interface MoneyRowForm {
   selector: 'app-add-expense',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  template: `
-    <main class="min-h-screen bg-neutral-950 text-neutral-100">
-      <section class="mx-auto grid max-w-6xl gap-6 px-4 py-6 lg:grid-cols-[1.4fr_0.8fr]">
-        <form
-          class="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-xl shadow-black/20 sm:p-6"
-          [formGroup]="form"
-          (ngSubmit)="submit()"
-        >
-          <header class="mb-6 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h1 class="text-2xl font-semibold tracking-normal text-white">Dutch</h1>
-              <p class="text-sm text-neutral-400">Add a USD-anchored shared expense</p>
-            </div>
-            <span
-              class="rounded-md border px-3 py-1 text-xs font-medium"
-              [ngClass]="{
-                'border-emerald-700 bg-emerald-950 text-emerald-200': fxState() === 'ready',
-                'border-red-700 bg-red-950 text-red-200': fxState() === 'failed',
-                'border-sky-700 bg-sky-950 text-sky-200': fxState() === 'loading',
-                'border-neutral-700 bg-neutral-900 text-neutral-300': fxState() === 'idle'
-              }"
-            >
-              {{ fxLabel() }}
-            </span>
-          </header>
-
-          <div class="grid gap-4 sm:grid-cols-2">
-            <label class="grid gap-2 text-sm">
-              <span class="text-neutral-300">Group</span>
-              <select class="control" formControlName="groupId">
-                <option value="group-trip">Trip to Amsterdam</option>
-                <option value="group-home">Flatmates</option>
-              </select>
-            </label>
-
-            <label class="grid gap-2 text-sm">
-              <span class="text-neutral-300">Currency</span>
-              <select class="control" formControlName="currency" (change)="resetFx()">
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="GBP">GBP</option>
-                <option value="INR">INR</option>
-                <option value="JPY">JPY</option>
-              </select>
-            </label>
-
-            <label class="grid gap-2 text-sm">
-              <span class="text-neutral-300">Total amount</span>
-              <input
-                class="control"
-                inputmode="decimal"
-                placeholder="0.00"
-                formControlName="total"
-                (input)="syncSplitFromMode()"
-              />
-            </label>
-
-            <label class="grid gap-2 text-sm">
-              <span class="text-neutral-300">Date</span>
-              <input class="control" type="date" formControlName="date" />
-            </label>
-
-            <label class="grid gap-2 text-sm">
-              <span class="text-neutral-300">Time</span>
-              <input class="control" type="time" formControlName="time" />
-            </label>
-
-            <label class="grid gap-2 text-sm">
-              <span class="text-neutral-300">Description</span>
-              <input class="control" placeholder="Dinner, taxi, tickets..." formControlName="description" />
-            </label>
-          </div>
-
-          <section class="mt-6 grid gap-3">
-            <div class="flex items-center justify-between gap-3">
-              <h2 class="text-base font-semibold text-white">Who paid</h2>
-              <button class="secondary-button" type="button" (click)="addPayer()">Add payer</button>
-            </div>
-
-            <div class="grid gap-2" formArrayName="payers">
-              <div
-                class="grid gap-2 rounded-md border border-neutral-800 bg-neutral-950 p-3 sm:grid-cols-[1fr_140px_auto]"
-                *ngFor="let row of payers.controls; let index = index"
-                [formGroupName]="index"
-              >
-                <select class="control" formControlName="userId">
-                  <option *ngFor="let person of people" [value]="person.id">{{ person.name }}</option>
-                </select>
-                <input
-                  class="control"
-                  inputmode="decimal"
-                  placeholder="0.00"
-                  formControlName="amount"
-                />
-                <button
-                  class="icon-button"
-                  type="button"
-                  title="Remove payer"
-                  (click)="removePayer(index)"
-                  [disabled]="payers.length === 1"
-                >
-                  -
-                </button>
-              </div>
-            </div>
-          </section>
-
-          <section class="mt-6 grid gap-3">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <h2 class="text-base font-semibold text-white">Who owes</h2>
-              <div class="segmented">
-                <button
-                  type="button"
-                  [class.active]="splitMode() === 'equal'"
-                  (click)="setSplitMode('equal')"
-                >
-                  Equal
-                </button>
-                <button
-                  type="button"
-                  [class.active]="splitMode() === 'exact'"
-                  (click)="setSplitMode('exact')"
-                >
-                  Exact
-                </button>
-                <button
-                  type="button"
-                  [class.active]="splitMode() === 'percent'"
-                  (click)="setSplitMode('percent')"
-                >
-                  %
-                </button>
-              </div>
-            </div>
-
-            <div class="grid gap-2" formArrayName="participants">
-              <div
-                class="grid gap-2 rounded-md border border-neutral-800 bg-neutral-950 p-3 sm:grid-cols-[1fr_120px_140px_auto]"
-                *ngFor="let row of participants.controls; let index = index"
-                [formGroupName]="index"
-              >
-                <select class="control" formControlName="userId" (change)="syncSplitFromMode()">
-                  <option *ngFor="let person of people" [value]="person.id">{{ person.name }}</option>
-                </select>
-                <input
-                  class="control"
-                  inputmode="decimal"
-                  placeholder="0"
-                  formControlName="percent"
-                  [readonly]="splitMode() !== 'percent'"
-                  (input)="syncSplitFromMode()"
-                />
-                <input
-                  class="control"
-                  inputmode="decimal"
-                  placeholder="0.00"
-                  formControlName="amount"
-                  [readonly]="splitMode() === 'equal' || splitMode() === 'percent'"
-                />
-                <button
-                  class="icon-button"
-                  type="button"
-                  title="Remove participant"
-                  (click)="removeParticipant(index)"
-                  [disabled]="participants.length === 1"
-                >
-                  -
-                </button>
-              </div>
-            </div>
-
-            <button class="secondary-button w-fit" type="button" (click)="addParticipant()">
-              Add participant
-            </button>
-          </section>
-
-          <div
-            class="mt-5 rounded-md border p-3 text-sm"
-            [ngClass]="validationMessage() ? 'border-red-800 bg-red-950 text-red-100' : 'border-emerald-800 bg-emerald-950 text-emerald-100'"
-          >
-            {{ validationMessage() || 'Paid and split totals match exactly.' }}
-          </div>
-
-          <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
-            <p class="text-sm text-neutral-400">
-              Native total: {{ totalDisplay() }} {{ currency() }}
-            </p>
-            <button class="primary-button" type="submit" [disabled]="submitDisabled()">
-              Save expense
-            </button>
-          </div>
-        </form>
-
-        <aside class="grid content-start gap-4">
-          <section class="rounded-lg border border-neutral-800 bg-neutral-900 p-4">
-            <h2 class="text-base font-semibold text-white">Queue</h2>
-            <div class="mt-3 grid gap-2 text-sm text-neutral-300" *ngIf="eventService.syncState$ | async as sync">
-              <p>Connection: {{ sync.online ? 'online' : 'offline' }}</p>
-              <p>Pending events: {{ sync.pendingEvents }}</p>
-              <p *ngIf="sync.lastError" class="text-red-300">{{ sync.lastError }}</p>
-            </div>
-          </section>
-
-          <section class="rounded-lg border border-neutral-800 bg-neutral-900 p-4">
-            <h2 class="text-base font-semibold text-white">Balances</h2>
-            <div class="mt-3 grid gap-2 text-sm text-neutral-300">
-              <p *ngFor="let balance of eventService.balances$ | async">
-                {{ nameFor(balance.fromUserId) }} owes {{ nameFor(balance.toUserId) }}
-                {{ money(balance.amountUsdMicros) }}
-              </p>
-              <p *ngIf="(eventService.balances$ | async)?.length === 0">No balances yet.</p>
-            </div>
-          </section>
-
-          <section class="rounded-lg border border-neutral-800 bg-neutral-900 p-4">
-            <h2 class="text-base font-semibold text-white">Payment approvals</h2>
-            <div class="mt-3 grid gap-2 text-sm text-neutral-300">
-              <p *ngFor="let settlement of eventService.pendingSettlements$ | async">
-                {{ nameFor(settlement.payeeId) }} must approve {{ money(settlement.amountUsdMicros) }}
-                from {{ nameFor(settlement.payerId) }}.
-              </p>
-              <p *ngIf="(eventService.pendingSettlements$ | async)?.length === 0">
-                No pending approvals.
-              </p>
-            </div>
-          </section>
-        </aside>
-      </section>
-    </main>
-  `,
-  styles: [
-    `
-      :host {
-        display: block;
-      }
-
-      .control {
-        width: 100%;
-        border-radius: 0.375rem;
-        border: 1px solid rgb(64 64 64);
-        background: rgb(10 10 10);
-        padding: 0.625rem 0.75rem;
-        color: white;
-        outline: none;
-      }
-
-      .control:focus {
-        border-color: rgb(14 165 233);
-        box-shadow: 0 0 0 2px rgb(14 165 233 / 0.2);
-      }
-
-      .control[readonly] {
-        color: rgb(163 163 163);
-      }
-
-      .primary-button,
-      .secondary-button,
-      .icon-button,
-      .segmented button {
-        border-radius: 0.375rem;
-        font-weight: 600;
-        transition:
-          background-color 120ms ease,
-          border-color 120ms ease,
-          color 120ms ease;
-      }
-
-      .primary-button {
-        background: rgb(14 165 233);
-        color: rgb(8 47 73);
-        padding: 0.75rem 1rem;
-      }
-
-      .primary-button:disabled,
-      .secondary-button:disabled,
-      .icon-button:disabled {
-        cursor: not-allowed;
-        opacity: 0.45;
-      }
-
-      .secondary-button,
-      .icon-button {
-        border: 1px solid rgb(64 64 64);
-        background: rgb(23 23 23);
-        color: rgb(229 229 229);
-        padding: 0.5rem 0.75rem;
-      }
-
-      .icon-button {
-        min-width: 2.5rem;
-      }
-
-      .segmented {
-        display: inline-grid;
-        grid-template-columns: repeat(3, minmax(4rem, 1fr));
-        overflow: hidden;
-        border-radius: 0.375rem;
-        border: 1px solid rgb(64 64 64);
-      }
-
-      .segmented button {
-        background: rgb(23 23 23);
-        color: rgb(212 212 212);
-        padding: 0.5rem 0.75rem;
-      }
-
-      .segmented button.active {
-        background: rgb(14 165 233);
-        color: rgb(8 47 73);
-      }
-    `,
-  ],
+  templateUrl: './add-expense.component.html',
+  styleUrl: './add-expense.component.scss',
 })
 export class AddExpenseComponent {
   protected readonly eventService = inject(EventSourcingService);
@@ -399,10 +89,7 @@ export class AddExpenseComponent {
     return this.validateForm();
   });
   protected readonly submitDisabled = computed(
-    () =>
-      this.form.invalid ||
-      Boolean(this.validationMessage()) ||
-      this.fxState() === 'loading',
+    () => this.form.invalid || Boolean(this.validationMessage()) || this.fxState() === 'loading',
   );
   protected readonly fxLabel = computed(() => {
     if (this.fxState() === 'loading') {
@@ -562,7 +249,10 @@ export class AddExpenseComponent {
   private validateForm(): string | null {
     try {
       const totalMinor = this.totalMinor();
-      const paidMinor = this.readMoneyRows(this.payers).reduce((sum, row) => sum + row.amountMinor, 0);
+      const paidMinor = this.readMoneyRows(this.payers).reduce(
+        (sum, row) => sum + row.amountMinor,
+        0,
+      );
       const owedMinor = this.readMoneyRows(this.participants).reduce(
         (sum, row) => sum + row.amountMinor,
         0,
@@ -580,7 +270,10 @@ export class AddExpenseComponent {
         return `Split total must equal ${formatMinorUnits(totalMinor, this.currency())} ${this.currency()}.`;
       }
 
-      if (new Set(this.payers.controls.map((row) => row.controls.userId.value)).size !== this.payers.length) {
+      if (
+        new Set(this.payers.controls.map((row) => row.controls.userId.value)).size !==
+        this.payers.length
+      ) {
         return 'Each payer can appear only once.';
       }
 

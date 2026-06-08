@@ -1,0 +1,48 @@
+<h2 mat-dialog-title>{{ isEditing() ? 'Manage group' : 'Create group' }}</h2>
+<mat-dialog-content class="dialog-body">
+  <mat-form-field appearance="outline">
+    <mat-label>Group name</mat-label>
+    <input matInput [(ngModel)]="name" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Default currency</mat-label>
+    <mat-select [(ngModel)]="defaultCurrency">
+      @for (currency of currencies; track currency) {
+        <mat-option [value]="currency">{{ currency }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <section>
+    <div class="section-title">
+      <h3>Members</h3>
+      <span>{{ selectedMemberIds().size }} selected</span>
+    </div>
+    <mat-selection-list>
+      @for (friend of friends(); track friend.friendId) {
+        <mat-list-option
+          [disabled]="friend.friendId === currentUserId"
+          [selected]="selectedMemberIds().has(friend.friendId)"
+          (selectedChange)="setMemberSelected(friend.friendId, $event)"
+        >
+          <mat-icon matListItemIcon>{{
+            friend.friendId === currentUserId ? 'person' : 'person_outline'
+          }}</mat-icon>
+          <span matListItemTitle>{{ friend.displayName }}</span>
+          <span matListItemLine>{{ friend.phoneNumber }}</span>
+        </mat-list-option>
+      }
+    </mat-selection-list>
+  </section>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-flat-button color="primary" type="button" [disabled]="saving()" (click)="save()">
+    {{ isEditing() ? 'Save changes' : 'Create group' }}
+  </button>
+</mat-dialog-actions>

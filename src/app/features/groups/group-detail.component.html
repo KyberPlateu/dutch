@@ -1,0 +1,74 @@
+<main class="group-page">
+  <mat-toolbar class="topbar">
+    <a mat-icon-button routerLink="/" aria-label="Back to dashboard">
+      <mat-icon>arrow_back</mat-icon>
+    </a>
+    <span>{{ group()?.name ?? 'Group' }}</span>
+    <span class="spacer"></span>
+    <a mat-flat-button color="primary" [routerLink]="['/groups', groupId, 'expenses', 'new']">
+      <mat-icon>add</mat-icon>
+      Add expense
+    </a>
+  </mat-toolbar>
+
+  <section class="group-grid">
+    <header class="hero-panel">
+      <p class="eyebrow">Active group</p>
+      <div class="hero-title">
+        <h1>{{ group()?.name ?? 'Group' }}</h1>
+        <button mat-stroked-button type="button" (click)="openManageGroup()">
+          <mat-icon>manage_accounts</mat-icon>
+          Manage group
+        </button>
+      </div>
+      <mat-chip-set>
+        @for (member of members(); track member.friendId) {
+          <mat-chip>
+            <span class="avatar">{{ initials(member.displayName) }}</span>
+            {{ member.displayName }}
+          </mat-chip>
+        }
+      </mat-chip-set>
+    </header>
+
+    <section class="panel">
+      <h2>Balances</h2>
+      <mat-list>
+        @for (balance of balances(); track balanceKey(balance)) {
+          <mat-list-item>
+            <mat-icon matListItemIcon [class.negative]="balance.fromUserId === currentUserId">
+              {{ balance.fromUserId === currentUserId ? 'trending_down' : 'trending_up' }}
+            </mat-icon>
+            <span matListItemTitle>{{ balanceText(balance) }}</span>
+            <span matListItemLine>{{ money(balance.amountUsdMicros) }}</span>
+          </mat-list-item>
+        } @empty {
+          <p class="empty-state">This group is settled up.</p>
+        }
+      </mat-list>
+    </section>
+
+    <section class="panel activity-panel">
+      <h2>Activity feed</h2>
+      @for (item of activity(); track item.eventId) {
+        <article class="activity-row">
+          <mat-icon>{{ iconFor(item.eventType) }}</mat-icon>
+          <div>
+            <strong>{{ item.summary }}</strong>
+            <p>
+              <span class="event-tag" [class.group-event]="item.tag === 'group'">{{
+                tagText(item.tag)
+              }}</span>
+              {{ item.createdAt | date: 'MMM d, h:mm a' }}
+              @if (item.amountUsdMicros) {
+                · {{ money(item.amountUsdMicros) }}
+              }
+            </p>
+          </div>
+        </article>
+      } @empty {
+        <p class="empty-state">Add an expense to start the group ledger.</p>
+      }
+    </section>
+  </section>
+</main>

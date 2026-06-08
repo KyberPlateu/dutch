@@ -1,0 +1,172 @@
+<main class="dashboard-page">
+  <mat-toolbar class="topbar">
+    <div class="brand">
+      <span class="brand-mark">D</span>
+      <span>Dutch</span>
+    </div>
+    <span class="spacer"></span>
+    <span class="sync-pill" [class.pending]="sync().pendingEvents > 0">
+      {{ syncLabel() }}
+    </span>
+    <button mat-icon-button type="button" aria-label="Add friend" (click)="openAddFriend()">
+      <mat-icon>person_add</mat-icon>
+    </button>
+    <button mat-icon-button type="button" aria-label="Create group" (click)="openCreateGroup()">
+      <mat-icon>group_add</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  @if (sync().syncing) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  }
+
+  <section class="dashboard-grid">
+    <section class="balance-panel">
+      <p class="eyebrow">Overall balance</p>
+      <h1>You are owed {{ money(dashboard().totalYouAreOwedUsdMicros) }}</h1>
+      <div class="balance-row">
+        <span class="positive">Owed to you {{ money(dashboard().totalYouAreOwedUsdMicros) }}</span>
+        <span class="negative">You owe {{ money(dashboard().totalYouOweUsdMicros) }}</span>
+      </div>
+      <mat-form-field class="currency-field" appearance="outline">
+        <mat-label>Global currency</mat-label>
+        <mat-select [ngModel]="globalCurrency()" (ngModelChange)="setGlobalCurrency($event)">
+          @for (currency of currencies; track currency) {
+            <mat-option [value]="currency">{{ currency }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <div class="quick-actions">
+        <a mat-flat-button color="primary" routerLink="/expenses/new">
+          <mat-icon>add</mat-icon>
+          Add expense
+        </a>
+        <button mat-stroked-button type="button" (click)="openAddFriend()">
+          <mat-icon>person_add</mat-icon>
+          Add friend
+        </button>
+        <button mat-stroked-button type="button" (click)="openCreateGroup()">
+          <mat-icon>group_add</mat-icon>
+          Create group
+        </button>
+      </div>
+    </section>
+
+    <section class="lists-panel">
+      <section class="group-overview">
+        <div class="section-title">
+          <h2>Groups</h2>
+          <button mat-button type="button" (click)="openCreateGroup()">
+            <mat-icon>add</mat-icon>
+            Create
+          </button>
+        </div>
+        @for (group of dashboard().groupSummaries; track group.groupId) {
+          <a class="group-pill" [routerLink]="['/groups', group.groupId]">
+            <span class="avatar group-avatar">{{ group.name.slice(0, 1) }}</span>
+            <span>
+              <strong>{{ group.name }}</strong>
+              <small>{{ groupText(group.netUsdMicros) }}</small>
+            </span>
+          </a>
+        }
+      </section>
+
+      <mat-tab-group animationDuration="160ms">
+        <mat-tab label="Friends">
+          <mat-nav-list class="entity-list">
+            @for (friend of dashboard().friendBalances; track friend.friendId) {
+              <a mat-list-item>
+                <span matListItemIcon class="avatar">{{ initials(friend.displayName) }}</span>
+                <span matListItemTitle>{{ friend.displayName }}</span>
+                <span matListItemLine>{{ friend.phoneNumber }}</span>
+                <span
+                  class="amount"
+                  [class.positive]="friend.netUsdMicros > 0"
+                  [class.negative]="friend.netUsdMicros < 0"
+                >
+                  {{ balanceText(friend.netUsdMicros) }}
+                </span>
+              </a>
+              <mat-divider />
+            } @empty {
+              <p class="empty-state">Add friends by phone number to start splitting expenses.</p>
+            }
+          </mat-nav-list>
+        </mat-tab>
+
+        <mat-tab label="Groups">
+          <mat-nav-list class="entity-list">
+            @for (group of dashboard().groupSummaries; track group.groupId) {
+              <a mat-list-item [routerLink]="['/groups', group.groupId]">
+                <span matListItemIcon class="avatar group-avatar">{{
+                  group.name.slice(0, 1)
+                }}</span>
+                <span matListItemTitle>{{ group.name }}</span>
+                <span matListItemLine>{{ group.memberIds.length }} members</span>
+                <span
+                  class="amount"
+                  [class.positive]="group.netUsdMicros > 0"
+                  [class.negative]="group.netUsdMicros < 0"
+                >
+                  {{ groupText(group.netUsdMicros) }}
+                </span>
+              </a>
+              <mat-divider />
+            }
+          </mat-nav-list>
+        </mat-tab>
+
+        <mat-tab>
+          <ng-template mat-tab-label>
+            Activity
+            @if (dashboard().pendingApprovalCount > 0) {
+              <span class="tab-badge" [matBadge]="dashboard().pendingApprovalCount"></span>
+            }
+          </ng-template>
+          <mat-list class="activity-list">
+            @for (item of dashboard().recentActivity; track item.eventId) {
+              <mat-list-item>
+                <mat-icon matListItemIcon>{{ iconFor(item.eventType) }}</mat-icon>
+                <span matListItemTitle>{{ item.summary }}</span>
+                <span matListItemLine>
+                  {{ item.createdAt | date: 'MMM d, h:mm a' }}
+                  @if (item.amountUsdMicros) {
+                    · {{ money(item.amountUsdMicros) }}
+                  }
+                </span>
+              </mat-list-item>
+            } @empty {
+              <p class="empty-state">
+                Expenses and payments will appear here as event-log entries.
+              </p>
+            }
+          </mat-list>
+        </mat-tab>
+      </mat-tab-group>
+    </section>
+
+    <aside class="desktop-activity">
+      <h2>Event log</h2>
+      @for (item of dashboard().recentActivity; track item.eventId) {
+        <div class="activity-card">
+          <mat-icon>{{ iconFor(item.eventType) }}</mat-icon>
+          <div>
+            <strong>{{ item.summary }}</strong>
+            <p>
+              <span class="event-tag" [class.group-event]="item.tag === 'group'">{{
+                tagText(item.tag)
+              }}</span>
+              {{ item.createdAt | date: 'MMM d, h:mm a' }}
+              @if (item.amountUsdMicros) {
+                · {{ money(item.amountUsdMicros) }}
+              }
+            </p>
+          </div>
+        </div>
+      } @empty {
+        <p class="empty-state">No events yet.</p>
+      }
+    </aside>
+  </section>
+</main>

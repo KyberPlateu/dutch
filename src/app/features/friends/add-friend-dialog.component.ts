@@ -18,47 +18,8 @@ import { EventSourcingService } from '../../core/event-sourcing.service';
     MatIconModule,
     MatInputModule,
   ],
-  template: `
-    <h2 mat-dialog-title>Add friend</h2>
-    <mat-dialog-content class="dialog-body">
-      <mat-form-field appearance="outline">
-        <mat-label>Name</mat-label>
-        <input matInput [(ngModel)]="displayName" autocomplete="name" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Phone number</mat-label>
-        <input matInput [(ngModel)]="phoneNumber" inputmode="tel" autocomplete="tel" />
-        <mat-hint>Phone lookup is local-only until backend search exists.</mat-hint>
-      </mat-form-field>
-
-      @if (error()) {
-        <p class="error">{{ error() }}</p>
-      }
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancel</button>
-      <button mat-flat-button color="primary" type="button" [disabled]="saving()" (click)="save()">
-        Add friend
-      </button>
-    </mat-dialog-actions>
-  `,
-  styles: [
-    `
-      .dialog-body {
-        display: grid;
-        gap: 0.75rem;
-        min-width: min(24rem, 78vw);
-        padding-top: 0.5rem;
-      }
-
-      .error {
-        margin: 0;
-        color: var(--dutch-negative);
-        font-size: 0.875rem;
-      }
-    `,
-  ],
+  templateUrl: './add-friend-dialog.component.html',
+  styleUrl: './add-friend-dialog.component.scss',
 })
 export class AddFriendDialogComponent {
   private readonly eventService = inject(EventSourcingService);

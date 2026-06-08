@@ -1,0 +1,23 @@
+<h2 mat-dialog-title>Add friend</h2>
+<mat-dialog-content class="dialog-body">
+  <mat-form-field appearance="outline">
+    <mat-label>Name</mat-label>
+    <input matInput [(ngModel)]="displayName" autocomplete="name" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Phone number</mat-label>
+    <input matInput [(ngModel)]="phoneNumber" inputmode="tel" autocomplete="tel" />
+    <mat-hint>Phone lookup is local-only until backend search exists.</mat-hint>
+  </mat-form-field>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-flat-button color="primary" type="button" [disabled]="saving()" (click)="save()">
+    Add friend
+  </button>
+</mat-dialog-actions>

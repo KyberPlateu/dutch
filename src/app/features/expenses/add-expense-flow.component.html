@@ -1,0 +1,217 @@
+<main class="expense-page">
+  <mat-toolbar class="topbar">
+    <a mat-icon-button [routerLink]="backLink()" aria-label="Cancel">
+      <mat-icon>close</mat-icon>
+    </a>
+    <span>New expense</span>
+    <span class="spacer"></span>
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      [disabled]="saving() || validationMessage()"
+      (click)="save()"
+    >
+      Save
+    </button>
+  </mat-toolbar>
+
+  <section class="flow-panel">
+    <section class="quick-card">
+      <div class="quick-header">
+        <span class="scope-pill">
+          <mat-icon>{{ isGroupScoped() ? 'groups' : 'person_add' }}</mat-icon>
+          {{ scopeLabel() }}
+        </span>
+        <span class="member-count">{{ selectedParticipants().length }} people</span>
+      </div>
+
+      <div class="quick-entry">
+        <span class="expense-icon"><mat-icon>receipt_long</mat-icon></span>
+        <mat-form-field class="description-field" appearance="outline">
+          <mat-label>What was this for?</mat-label>
+          <input matInput [(ngModel)]="description" placeholder="Dinner, taxi, tickets" />
+        </mat-form-field>
+      </div>
+
+      <div class="amount-entry">
+        <mat-form-field class="currency-select" appearance="outline">
+          <mat-label>Currency</mat-label>
+          <mat-select [ngModel]="currency()" (ngModelChange)="setCurrency($event)">
+            @for (option of currencies; track option) {
+              <mat-option [value]="option">{{ option }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="amount-field" appearance="outline">
+          <mat-label>Total amount</mat-label>
+          <input
+            matInput
+            class="amount-input"
+            inputmode="decimal"
+            [ngModel]="total()"
+            (ngModelChange)="setTotal($event)"
+            placeholder="0.00"
+          />
+        </mat-form-field>
+      </div>
+
+      <div class="paid-split-summary">
+        <span
+          >Paid by <strong>{{ payerSummary() }}</strong></span
+        >
+        <span
+          >Split <strong>{{ splitModeLabel() }}</strong></span
+        >
+      </div>
+
+      <div class="date-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Date</mat-label>
+          <input
+            matInput
+            [matDatepicker]="picker"
+            [ngModel]="date()"
+            (ngModelChange)="date.set($event)"
+          />
+          <mat-datepicker-toggle matIconSuffix [for]="picker" />
+          <mat-datepicker #picker />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Time</mat-label>
+          <input matInput type="time" [(ngModel)]="time" />
+        </mat-form-field>
+      </div>
+
+      <div class="fx-card" [class.ready]="fxRateToUsd()">
+        <mat-icon>{{ fxRateToUsd() ? 'currency_exchange' : 'cloud_sync' }}</mat-icon>
+        <span>{{ fxLabel() }}</span>
+      </div>
+    </section>
+
+    <section class="panel participants-panel">
+      <div class="section-heading">
+        <div>
+          <h2>Participants</h2>
+          <p>{{ selectedNames() }}</p>
+        </div>
+      </div>
+
+      <mat-selection-list>
+        @for (participant of participants(); track participant.userId; let index = $index) {
+          <mat-list-option
+            [selected]="participant.selected"
+            (selectedChange)="setParticipantSelected(index, $event)"
+          >
+            <span matListItemTitle>{{ nameFor(participant.userId) }}</span>
+            <span matListItemLine>{{
+              participant.userId === currentUserId ? 'You' : 'Friend'
+            }}</span>
+          </mat-list-option>
+        }
+      </mat-selection-list>
+    </section>
+
+    <section class="panel split-section">
+      <div class="section-heading">
+        <div>
+          <h2>Who paid?</h2>
+          <p>Current default is the full amount paid by you.</p>
+        </div>
+        <button mat-stroked-button type="button" (click)="addPayer()">
+          <mat-icon>add</mat-icon>
+          Add payer
+        </button>
+      </div>
+
+      @for (payer of payers(); track payer.userId; let index = $index) {
+        <div class="row-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Payer</mat-label>
+            <mat-select [ngModel]="payer.userId" (ngModelChange)="setPayerUser(index, $event)">
+              @for (member of selectedMembers(); track member.friendId) {
+                <mat-option [value]="member.friendId">{{ member.displayName }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Amount</mat-label>
+            <input
+              matInput
+              inputmode="decimal"
+              [ngModel]="payer.amount"
+              (ngModelChange)="setPayerAmount(index, $event)"
+            />
+          </mat-form-field>
+          <button
+            mat-icon-button
+            type="button"
+            [disabled]="payers().length === 1"
+            (click)="removePayer(index)"
+          >
+            <mat-icon>remove_circle</mat-icon>
+          </button>
+        </div>
+      }
+    </section>
+
+    <section class="panel split-section">
+      <div class="section-heading">
+        <div>
+          <h2>Split</h2>
+          <p>Equal split is prefilled; switch modes when needed.</p>
+        </div>
+        <mat-button-toggle-group [ngModel]="splitMode()" (ngModelChange)="setSplitMode($event)">
+          <mat-button-toggle value="equal">Equal</mat-button-toggle>
+          <mat-button-toggle value="exact">Exact</mat-button-toggle>
+          <mat-button-toggle value="percent">%</mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+
+      @for (participant of selectedParticipants(); track participant.userId; let index = $index) {
+        <div class="row-grid split-row">
+          <div class="person-name">{{ nameFor(participant.userId) }}</div>
+          <mat-form-field appearance="outline">
+            <mat-label>Percent</mat-label>
+            <input
+              matInput
+              inputmode="decimal"
+              [disabled]="splitMode() !== 'percent'"
+              [ngModel]="participant.percent"
+              (ngModelChange)="setParticipantPercent(participant.userId, $event)"
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Owes</mat-label>
+            <input
+              matInput
+              inputmode="decimal"
+              [disabled]="splitMode() !== 'exact'"
+              [ngModel]="participant.amount"
+              (ngModelChange)="setParticipantAmount(participant.userId, $event)"
+            />
+          </mat-form-field>
+        </div>
+      }
+    </section>
+
+    <section class="review-card" [class.invalid]="validationMessage()">
+      <div>
+        <strong>{{ validationMessage() || 'Ready to save.' }}</strong>
+        <span>{{ currency() }} {{ total() }} · {{ displayTotalLabel() }}</span>
+      </div>
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        [disabled]="saving() || validationMessage()"
+        (click)="save()"
+      >
+        <mat-icon>check</mat-icon>
+        Save expense
+      </button>
+    </section>
+  </section>
+</main>
