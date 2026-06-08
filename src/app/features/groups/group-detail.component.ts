@@ -18,6 +18,7 @@ import {
   Group,
 } from '../../core/event-sourcing.service';
 import { CurrencyDisplayService } from '../../core/currency-display.service';
+import { ThemeSelectorComponent } from '../../shared/theme-selector.component';
 import { GroupEditorDialogComponent } from './group-editor-dialog.component';
 
 @Component({
@@ -33,6 +34,7 @@ import { GroupEditorDialogComponent } from './group-editor-dialog.component';
     MatListModule,
     MatToolbarModule,
     RouterLink,
+    ThemeSelectorComponent,
   ],
   templateUrl: './group-detail.component.html',
   styleUrl: './group-detail.component.scss',

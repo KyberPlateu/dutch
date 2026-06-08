@@ -5,6 +5,7 @@
     </a>
     <span>New expense</span>
     <span class="spacer"></span>
+    <app-theme-selector />
     <button
       mat-flat-button
       color="primary"
@@ -25,6 +26,19 @@
         </span>
         <span class="member-count">{{ selectedParticipants().length }} people</span>
       </div>
+
+      <mat-form-field class="scope-field" appearance="outline">
+        <mat-label>Expense type</mat-label>
+        <mat-select
+          [ngModel]="selectedGroupId() ?? 'direct'"
+          (ngModelChange)="setExpenseScope($event)"
+        >
+          <mat-option value="direct">Direct expense</mat-option>
+          @for (group of groupOptions(); track group.groupId) {
+            <mat-option [value]="group.groupId">{{ group.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
 
       <div class="quick-entry">
         <span class="expense-icon"><mat-icon>receipt_long</mat-icon></span>
@@ -99,19 +113,51 @@
         </div>
       </div>
 
-      <mat-selection-list>
-        @for (participant of participants(); track participant.userId; let index = $index) {
-          <mat-list-option
-            [selected]="participant.selected"
-            (selectedChange)="setParticipantSelected(index, $event)"
-          >
-            <span matListItemTitle>{{ nameFor(participant.userId) }}</span>
-            <span matListItemLine>{{
-              participant.userId === currentUserId ? 'You' : 'Friend'
-            }}</span>
-          </mat-list-option>
-        }
-      </mat-selection-list>
+      <mat-form-field class="participant-search" appearance="outline">
+        <mat-label>Add participant</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input
+          #participantInput
+          matInput
+          type="search"
+          [ngModel]="participantQuery()"
+          (ngModelChange)="setParticipantQuery($event)"
+          [matAutocomplete]="participantAutocomplete"
+          [placeholder]="isGroupScoped() ? 'Search group members' : 'Search friends'"
+        />
+        <mat-autocomplete
+          #participantAutocomplete="matAutocomplete"
+          (optionSelected)="addParticipant($event.option.value, participantInput)"
+        >
+          @for (member of participantSuggestions(); track member.friendId) {
+            <mat-option [value]="member.friendId">
+              <span>{{ member.displayName }}</span>
+              <small>{{ member.friendId === currentUserId ? 'You' : member.phoneNumber }}</small>
+            </mat-option>
+          } @empty {
+            <mat-option disabled>No matching people</mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+
+      @if (selectedParticipants().length > 0) {
+        <mat-chip-set class="participant-chips" aria-label="Selected participants">
+          @for (participant of selectedParticipants(); track participant.userId) {
+            <mat-chip (removed)="removeParticipant(participant.userId)">
+              <span>{{ nameFor(participant.userId) }}</span>
+              <button
+                matChipRemove
+                type="button"
+                [attr.aria-label]="'Remove ' + nameFor(participant.userId)"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            </mat-chip>
+          }
+        </mat-chip-set>
+      } @else {
+        <p class="empty-selection">Search and add at least two people.</p>
+      }
     </section>
 
     <section class="panel split-section">

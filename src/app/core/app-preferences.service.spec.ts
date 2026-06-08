@@ -29,4 +29,26 @@ describe('AppPreferencesService', () => {
     expect(() => service.setGlobalCurrency('BTC')).toThrow(/Unsupported global currency/);
     expect(service.globalCurrency()).toBe('USD');
   });
+
+  it('defaults the theme mode to system', () => {
+    const service = TestBed.inject(AppPreferencesService);
+
+    expect(service.themeMode()).toBe('system');
+  });
+
+  it('persists the selected theme mode', () => {
+    const service = TestBed.inject(AppPreferencesService);
+
+    service.setThemeMode('dark');
+    TestBed.resetTestingModule();
+
+    expect(TestBed.inject(AppPreferencesService).themeMode()).toBe('dark');
+  });
+
+  it('rejects unsupported theme modes', () => {
+    const service = TestBed.inject(AppPreferencesService);
+
+    expect(() => service.setThemeMode('sepia')).toThrow(/Unsupported theme mode/);
+    expect(service.themeMode()).toBe('system');
+  });
 });

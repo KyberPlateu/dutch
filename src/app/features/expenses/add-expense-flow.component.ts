@@ -2,14 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatListModule } from '@angular/material/list';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -32,6 +32,7 @@ import {
   splitPercentMinorUnits,
 } from '../../core/event-sourcing.service';
 import { sampleFxRateToUsd } from '../../core/fx-rates';
+import { ThemeSelectorComponent } from '../../shared/theme-selector.component';
 
 interface MoneyRow {
   userId: string;
@@ -49,19 +50,20 @@ interface ParticipantRow extends MoneyRow {
   imports: [
     CommonModule,
     FormsModule,
+    MatAutocompleteModule,
     MatButtonModule,
     MatButtonToggleModule,
-    MatCheckboxModule,
+    MatChipsModule,
     MatDatepickerModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
-    MatListModule,
     MatNativeDateModule,
     MatSelectModule,
     MatSnackBarModule,
     MatToolbarModule,
     RouterLink,
+    ThemeSelectorComponent,
   ],
   templateUrl: './add-expense-flow.component.html',
   styleUrl: './add-expense-flow.component.scss',
@@ -76,7 +78,8 @@ export class AddExpenseFlowComponent {
 
   protected readonly currentUserId = CURRENT_USER_ID;
   protected readonly currencies = SUPPORTED_CURRENCIES;
-  protected readonly groupId = this.route.snapshot.paramMap.get('groupId');
+  private readonly routeGroupId = this.route.snapshot.paramMap.get('groupId');
+  protected readonly selectedGroupId = signal<string | null>(this.routeGroupId);
   protected readonly description = signal('');
   protected readonly currency = signal<string>(this.preferences.globalCurrency());
   protected readonly total = signal('0.00');
@@ -88,11 +91,12 @@ export class AddExpenseFlowComponent {
   protected readonly saving = signal(false);
   protected readonly payers = signal<MoneyRow[]>([{ userId: CURRENT_USER_ID, amount: '0.00' }]);
   protected readonly participants = signal<ParticipantRow[]>([]);
+  protected readonly participantQuery = signal('');
 
   private groups: Group[] = [];
   private friends: Friend[] = [];
   private groupMembers: Record<string, Friend[]> = {};
-  private initialized = false;
+  private initializedScopeKey: string | null = null;
 
   protected readonly selectedParticipants = computed(() =>
     this.participants().filter((participant) => participant.selected),
@@ -102,6 +106,26 @@ export class AddExpenseFlowComponent {
       this.selectedParticipants().map((participant) => participant.userId),
     );
     return this.memberOptions().filter((member) => selectedIds.has(member.friendId));
+  });
+  protected readonly participantSuggestions = computed(() => {
+    const query = this.participantQuery().trim().toLowerCase();
+    const selectedIds = new Set(
+      this.selectedParticipants().map((participant) => participant.userId),
+    );
+
+    return this.memberOptions()
+      .filter((member) => !selectedIds.has(member.friendId))
+      .filter((member) => {
+        if (!query) {
+          return true;
+        }
+
+        return (
+          member.displayName.toLowerCase().includes(query) ||
+          member.phoneNumber.toLowerCase().includes(query)
+        );
+      })
+      .slice(0, 6);
   });
   protected readonly validationMessage = computed(() => this.validate());
 
@@ -113,20 +137,37 @@ export class AddExpenseFlowComponent {
     });
     this.eventService.friends$.pipe(takeUntilDestroyed(destroyRef)).subscribe((friends) => {
       this.friends = friends;
-      this.initializeRows();
+      this.initializeRowsForScope();
     });
     this.eventService.groupMembers$.pipe(takeUntilDestroyed(destroyRef)).subscribe((members) => {
       this.groupMembers = members;
-      this.initializeRows();
+      this.initializeRowsForScope();
     });
   }
 
   protected isGroupScoped(): boolean {
-    return Boolean(this.groupId);
+    return Boolean(this.selectedGroupId());
   }
 
   protected backLink(): string {
-    return this.groupId ? `/groups/${this.groupId}` : '/';
+    return this.routeGroupId ? `/groups/${this.routeGroupId}` : '/';
+  }
+
+  protected groupOptions(): Group[] {
+    return this.groups;
+  }
+
+  protected setExpenseScope(scope: string): void {
+    const nextGroupId = scope === 'direct' ? null : scope;
+
+    if (nextGroupId === this.selectedGroupId()) {
+      return;
+    }
+
+    this.selectedGroupId.set(nextGroupId);
+    this.participantQuery.set('');
+    this.initializedScopeKey = null;
+    this.initializeRowsForScope(true);
   }
 
   protected setCurrency(currency: string): void {
@@ -148,9 +189,24 @@ export class AddExpenseFlowComponent {
     this.resetSplitAmounts();
   }
 
-  protected setParticipantSelected(index: number, selected: boolean): void {
+  protected setParticipantQuery(query: string): void {
+    this.participantQuery.set(query);
+  }
+
+  protected addParticipant(userId: string, input?: HTMLInputElement): void {
     this.participants.update((rows) =>
-      rows.map((row, rowIndex) => (rowIndex === index ? { ...row, selected } : row)),
+      rows.map((row) => (row.userId === userId ? { ...row, selected: true } : row)),
+    );
+    this.participantQuery.set('');
+    if (input) {
+      input.value = '';
+    }
+    this.resetDefaultAmounts();
+  }
+
+  protected removeParticipant(userId: string): void {
+    this.participants.update((rows) =>
+      rows.map((row) => (row.userId === userId ? { ...row, selected: false } : row)),
     );
     this.resetDefaultAmounts();
   }
@@ -254,11 +310,13 @@ export class AddExpenseFlowComponent {
   }
 
   protected scopeLabel(): string {
-    if (!this.groupId) {
+    const selectedGroupId = this.selectedGroupId();
+
+    if (!selectedGroupId) {
       return 'Direct expense';
     }
 
-    return this.groups.find((group) => group.groupId === this.groupId)?.name ?? 'Group expense';
+    return this.groups.find((group) => group.groupId === selectedGroupId)?.name ?? 'Group expense';
   }
 
   protected selectedNames(): string {
@@ -311,21 +369,31 @@ export class AddExpenseFlowComponent {
     return usdMicros;
   }
 
-  private initializeRows(): void {
+  private initializeRowsForScope(force = false): void {
     const members = this.memberOptions();
+    const scopeKey = this.selectedGroupId() ?? 'direct';
 
-    if (this.initialized || members.length === 0) {
+    if (members.length === 0) {
+      if (force) {
+        this.participants.set([]);
+        this.resetDefaultAmounts();
+      }
+      this.initializedScopeKey = null;
       return;
     }
 
-    this.initialized = true;
+    if (!force && this.initializedScopeKey === scopeKey) {
+      return;
+    }
+
+    const defaultPayer =
+      members.find((member) => member.friendId === CURRENT_USER_ID)?.friendId ??
+      members[0].friendId;
+    this.initializedScopeKey = scopeKey;
     this.participants.set(
       members.map((member) => ({
         userId: member.friendId,
-        selected:
-          this.isGroupScoped() ||
-          member.friendId === CURRENT_USER_ID ||
-          member.friendId === 'user-bob',
+        selected: this.isGroupScoped() || member.friendId === defaultPayer,
         amount: '0.00',
         percent: '0',
       })),
@@ -334,8 +402,10 @@ export class AddExpenseFlowComponent {
   }
 
   private memberOptions(): Friend[] {
-    if (this.groupId) {
-      return this.groupMembers[this.groupId] ?? [];
+    const selectedGroupId = this.selectedGroupId();
+
+    if (selectedGroupId) {
+      return this.groupMembers[selectedGroupId] ?? [];
     }
 
     return this.friends.filter((friend) => friend.status === 'ACTIVE');
@@ -343,7 +413,13 @@ export class AddExpenseFlowComponent {
 
   private resetDefaultAmounts(): void {
     const total = safeFormat(this.total(), this.currency());
-    this.payers.set([{ userId: CURRENT_USER_ID, amount: total }]);
+    const selected = this.selectedParticipants();
+    const defaultPayer =
+      selected.find((participant) => participant.userId === CURRENT_USER_ID)?.userId ??
+      selected[0]?.userId ??
+      CURRENT_USER_ID;
+
+    this.payers.set([{ userId: defaultPayer, amount: total }]);
     this.resetSplitAmounts();
   }
 
@@ -435,6 +511,12 @@ export class AddExpenseFlowComponent {
         return 'Each payer can appear only once.';
       }
 
+      const selectedIds = new Set(selected.map((participant) => participant.userId));
+
+      if (this.payers().some((payer) => !selectedIds.has(payer.userId))) {
+        return 'Payers must be selected participants.';
+      }
+
       return null;
     } catch (error) {
       return error instanceof Error ? error.message : 'Expense is invalid.';
@@ -464,8 +546,10 @@ export class AddExpenseFlowComponent {
   }
 
   private async ensureGroup(): Promise<string> {
-    if (this.groupId) {
-      return this.groupId;
+    const selectedGroupId = this.selectedGroupId();
+
+    if (selectedGroupId) {
+      return selectedGroupId;
     }
 
     const memberIds = this.selectedParticipants().map((participant) => participant.userId);
@@ -510,7 +594,7 @@ export class AddExpenseFlowComponent {
         total: this.total(),
         date: this.date().toISOString(),
         time: this.time(),
-        groupId: this.groupId,
+        groupId: this.selectedGroupId(),
         payers: this.payers(),
         participants: this.participants(),
       }),

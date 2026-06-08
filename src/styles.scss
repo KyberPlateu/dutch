@@ -8,16 +8,190 @@
 @import 'tailwindcss';
 
 :root {
+  --dutch-font-sans: Inter, Roboto, 'Helvetica Neue', Arial, sans-serif;
   --dutch-primary: #0047ab;
   --dutch-primary-soft: #e8f2ff;
+  --dutch-primary-container: #d9e8ff;
+  --dutch-primary-strong: #002f73;
+  --dutch-secondary: #f97316;
+  --dutch-secondary-soft: #fff7ed;
+  --dutch-secondary-container: #ffedd5;
+  --dutch-secondary-strong: #c2410c;
   --dutch-positive: #10b981;
+  --dutch-positive-soft: #ecfdf5;
+  --dutch-positive-strong: #047857;
   --dutch-negative: #ef4444;
+  --dutch-negative-soft: #fef2f2;
+  --dutch-negative-strong: #b91c1c;
   --dutch-pending: #f59e0b;
+  --dutch-pending-soft: #fffbeb;
+  --dutch-pending-strong: #92400e;
   --dutch-surface: #ffffff;
+  --dutch-panel: rgb(255 255 255 / 0.94);
+  --dutch-topbar: rgb(255 255 255 / 0.92);
   --dutch-page: #f5f7fa;
   --dutch-border: #e5eaf0;
-  --dutch-text: #111827;
-  --dutch-muted: #6b7280;
+  --dutch-subtle: #f8fafc;
+  --dutch-page-tint: #dff5ff;
+  --dutch-text: #1f2937;
+  --dutch-muted: #475569;
+  --dutch-disabled: #6b7280;
+  --dutch-shadow: 0 18px 50px rgb(31 41 55 / 0.08);
+
+  --mat-sys-background: var(--dutch-page);
+  --mat-sys-error: var(--dutch-negative);
+  --mat-sys-error-container: var(--dutch-negative-soft);
+  --mat-sys-inverse-on-surface: #f8fafc;
+  --mat-sys-inverse-primary: #9ec5ff;
+  --mat-sys-inverse-surface: #111827;
+  --mat-sys-on-background: var(--dutch-text);
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-on-error-container: var(--dutch-negative-strong);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-on-primary-container: var(--dutch-primary-strong);
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-on-secondary-container: #7c2d12;
+  --mat-sys-on-surface: var(--dutch-text);
+  --mat-sys-on-surface-variant: var(--dutch-muted);
+  --mat-sys-outline: #94a3b8;
+  --mat-sys-outline-variant: var(--dutch-border);
+  --mat-sys-primary: var(--dutch-primary);
+  --mat-sys-primary-container: var(--dutch-primary-container);
+  --mat-sys-primary-fixed: var(--dutch-primary-container);
+  --mat-sys-primary-fixed-dim: #9ec5ff;
+  --mat-sys-scrim: #000000;
+  --mat-sys-secondary: var(--dutch-secondary);
+  --mat-sys-secondary-container: var(--dutch-secondary-container);
+  --mat-sys-secondary-fixed: var(--dutch-secondary-container);
+  --mat-sys-secondary-fixed-dim: #fed7aa;
+  --mat-sys-shadow: #000000;
+  --mat-sys-surface: var(--dutch-surface);
+  --mat-sys-surface-bright: var(--dutch-surface);
+  --mat-sys-surface-container: var(--dutch-subtle);
+  --mat-sys-surface-container-high: #f1f5f9;
+  --mat-sys-surface-container-highest: var(--dutch-border);
+  --mat-sys-surface-container-low: #fbfdff;
+  --mat-sys-surface-container-lowest: var(--dutch-surface);
+  --mat-sys-surface-dim: #e2e8f0;
+  --mat-sys-surface-tint: var(--dutch-primary);
+  --mat-sys-surface-variant: var(--dutch-border);
+  --mat-sys-tertiary: var(--dutch-positive);
+  --mat-sys-tertiary-container: var(--dutch-positive-soft);
+  --mat-sys-tertiary-fixed: var(--dutch-positive-soft);
+  --mat-sys-tertiary-fixed-dim: #a7f3d0;
+
+  --mat-sys-body-large: 400 1rem / 1.5rem var(--dutch-font-sans);
+  --mat-sys-body-large-font: var(--dutch-font-sans);
+  --mat-sys-body-large-tracking: 0;
+  --mat-sys-body-medium: 400 0.875rem / 1.25rem var(--dutch-font-sans);
+  --mat-sys-body-medium-font: var(--dutch-font-sans);
+  --mat-sys-body-medium-tracking: 0;
+  --mat-sys-body-small: 400 0.75rem / 1rem var(--dutch-font-sans);
+  --mat-sys-body-small-font: var(--dutch-font-sans);
+  --mat-sys-body-small-tracking: 0;
+  --mat-sys-display-large: 700 3.5rem / 4rem var(--dutch-font-sans);
+  --mat-sys-display-large-font: var(--dutch-font-sans);
+  --mat-sys-display-large-tracking: 0;
+  --mat-sys-display-medium: 700 2.75rem / 3.25rem var(--dutch-font-sans);
+  --mat-sys-display-medium-font: var(--dutch-font-sans);
+  --mat-sys-display-medium-tracking: 0;
+  --mat-sys-display-small: 700 2.25rem / 2.75rem var(--dutch-font-sans);
+  --mat-sys-display-small-font: var(--dutch-font-sans);
+  --mat-sys-display-small-tracking: 0;
+  --mat-sys-headline-large: 700 2rem / 2.5rem var(--dutch-font-sans);
+  --mat-sys-headline-large-font: var(--dutch-font-sans);
+  --mat-sys-headline-large-tracking: 0;
+  --mat-sys-headline-medium: 700 1.75rem / 2.25rem var(--dutch-font-sans);
+  --mat-sys-headline-medium-font: var(--dutch-font-sans);
+  --mat-sys-headline-medium-tracking: 0;
+  --mat-sys-headline-small: 700 1.5rem / 2rem var(--dutch-font-sans);
+  --mat-sys-headline-small-font: var(--dutch-font-sans);
+  --mat-sys-headline-small-tracking: 0;
+  --mat-sys-label-large: 700 0.875rem / 1.25rem var(--dutch-font-sans);
+  --mat-sys-label-large-font: var(--dutch-font-sans);
+  --mat-sys-label-large-tracking: 0;
+  --mat-sys-label-medium: 700 0.75rem / 1rem var(--dutch-font-sans);
+  --mat-sys-label-medium-font: var(--dutch-font-sans);
+  --mat-sys-label-medium-tracking: 0;
+  --mat-sys-label-small: 700 0.688rem / 1rem var(--dutch-font-sans);
+  --mat-sys-label-small-font: var(--dutch-font-sans);
+  --mat-sys-label-small-tracking: 0;
+  --mat-sys-title-large: 700 1.375rem / 1.75rem var(--dutch-font-sans);
+  --mat-sys-title-large-font: var(--dutch-font-sans);
+  --mat-sys-title-large-tracking: 0;
+  --mat-sys-title-medium: 700 1rem / 1.5rem var(--dutch-font-sans);
+  --mat-sys-title-medium-font: var(--dutch-font-sans);
+  --mat-sys-title-medium-tracking: 0;
+  --mat-sys-title-small: 700 0.875rem / 1.25rem var(--dutch-font-sans);
+  --mat-sys-title-small-font: var(--dutch-font-sans);
+  --mat-sys-title-small-tracking: 0;
+
+  --mat-badge-background-color: var(--dutch-pending);
+  --mat-badge-text-color: #ffffff;
+  --mat-button-filled-disabled-label-text-color: var(--dutch-disabled);
+  --mat-button-outlined-disabled-label-text-color: var(--dutch-disabled);
+  --mat-button-text-disabled-label-text-color: var(--dutch-disabled);
+  --mat-button-toggle-selected-state-background-color: var(--dutch-primary-soft);
+  --mat-button-toggle-selected-state-text-color: var(--dutch-primary);
+  --mat-progress-bar-active-indicator-color: var(--dutch-pending);
+  --mat-progress-bar-track-color: var(--dutch-pending-soft);
+  --mat-select-disabled-arrow-color: var(--dutch-disabled);
+  --mat-select-disabled-trigger-text-color: var(--dutch-disabled);
+  --mat-tab-active-indicator-color: var(--dutch-primary);
+  --mat-tab-active-label-text-color: var(--dutch-primary);
+  --mat-tab-active-hover-label-text-color: var(--dutch-primary);
+  --mat-tab-active-focus-label-text-color: var(--dutch-primary);
+  --mat-tab-inactive-label-text-color: var(--dutch-muted);
+  --mat-select-placeholder-text-color: var(--dutch-disabled);
+}
+
+html[data-theme='dark'] {
+  --dutch-primary: #3b82f6;
+  --dutch-primary-soft: #1e3a8a;
+  --dutch-primary-container: #1d4ed8;
+  --dutch-primary-strong: #bfdbfe;
+  --dutch-secondary: #f97316;
+  --dutch-secondary-soft: #431407;
+  --dutch-secondary-container: #7c2d12;
+  --dutch-secondary-strong: #fed7aa;
+  --dutch-positive: #10b981;
+  --dutch-positive-soft: #052e2b;
+  --dutch-positive-strong: #a7f3d0;
+  --dutch-negative: #ef4444;
+  --dutch-negative-soft: #450a0a;
+  --dutch-negative-strong: #fecaca;
+  --dutch-pending: #f59e0b;
+  --dutch-pending-soft: #422006;
+  --dutch-pending-strong: #fde68a;
+  --dutch-surface: #1e293b;
+  --dutch-panel: #1e293b;
+  --dutch-topbar: rgb(15 23 42 / 0.94);
+  --dutch-page: #0f172a;
+  --dutch-border: #334155;
+  --dutch-subtle: #263449;
+  --dutch-page-tint: #1e3a8a;
+  --dutch-text: #f9fafb;
+  --dutch-muted: #9ca3af;
+  --dutch-disabled: #6b7280;
+  --dutch-shadow: 0 18px 50px rgb(0 0 0 / 0.32);
+
+  --mat-sys-inverse-on-surface: #0f172a;
+  --mat-sys-inverse-primary: #0047ab;
+  --mat-sys-inverse-surface: #f9fafb;
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-on-primary: #0f172a;
+  --mat-sys-on-secondary: #231104;
+  --mat-sys-on-secondary-container: #fed7aa;
+  --mat-sys-outline: #64748b;
+  --mat-sys-primary-fixed-dim: #1d4ed8;
+  --mat-sys-secondary-fixed-dim: #c2410c;
+  --mat-sys-surface-container-high: #334155;
+  --mat-sys-surface-container-low: #172033;
+  --mat-sys-surface-dim: #0f172a;
+  --mat-sys-tertiary-fixed-dim: #047857;
+
+  --mat-badge-text-color: #0f172a;
+  --mat-select-placeholder-text-color: var(--dutch-disabled);
 }
 
 html,
@@ -25,11 +199,16 @@ body {
   height: 100%;
 }
 
+html {
+  background: var(--dutch-page);
+  color-scheme: light;
+}
+
 body {
   margin: 0;
   background: var(--dutch-page);
   color: var(--dutch-text);
-  font-family: Inter, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--dutch-font-sans);
 }
 
 button,
@@ -37,4 +216,9 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+::placeholder {
+  color: var(--dutch-disabled);
+  opacity: 1;
 }

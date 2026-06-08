@@ -23,6 +23,7 @@ import {
 } from '../../core/event-sourcing.service';
 import { AddFriendDialogComponent } from '../friends/add-friend-dialog.component';
 import { GroupEditorDialogComponent } from '../groups/group-editor-dialog.component';
+import { ThemeSelectorComponent } from '../../shared/theme-selector.component';
 
 const EMPTY_DASHBOARD: DashboardAggregate = {
   totalYouOweUsdMicros: 0,
@@ -59,6 +60,7 @@ const EMPTY_SYNC: SyncState = {
     MatTabsModule,
     MatToolbarModule,
     RouterLink,
+    ThemeSelectorComponent,
   ],
   templateUrl: './dashboard-shell.component.html',
   styleUrl: './dashboard-shell.component.scss',

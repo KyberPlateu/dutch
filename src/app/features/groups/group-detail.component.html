@@ -5,6 +5,7 @@
     </a>
     <span>{{ group()?.name ?? 'Group' }}</span>
     <span class="spacer"></span>
+    <app-theme-selector />
     <a mat-flat-button color="primary" [routerLink]="['/groups', groupId, 'expenses', 'new']">
       <mat-icon>add</mat-icon>
       Add expense

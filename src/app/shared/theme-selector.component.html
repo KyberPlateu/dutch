@@ -1,0 +1,18 @@
+<button
+  mat-icon-button
+  type="button"
+  class="theme-trigger"
+  [matMenuTriggerFor]="themeMenu"
+  [attr.aria-label]="buttonLabel()"
+>
+  <mat-icon>{{ activeOption().icon }}</mat-icon>
+</button>
+
+<mat-menu #themeMenu="matMenu" xPosition="before">
+  @for (option of themeOptions; track option.value) {
+    <button mat-menu-item type="button" (click)="setThemeMode(option.value)">
+      <mat-icon>{{ themeMode() === option.value ? 'check' : option.icon }}</mat-icon>
+      <span>{{ option.label }}</span>
+    </button>
+  }
+</mat-menu>

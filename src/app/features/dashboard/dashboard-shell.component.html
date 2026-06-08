@@ -8,6 +8,7 @@
     <span class="sync-pill" [class.pending]="sync().pendingEvents > 0">
       {{ syncLabel() }}
     </span>
+    <app-theme-selector />
     <button mat-icon-button type="button" aria-label="Add friend" (click)="openAddFriend()">
       <mat-icon>person_add</mat-icon>
     </button>

@@ -2,7 +2,10 @@
   display: grid;
   gap: 0.75rem;
   min-width: min(30rem, 82vw);
-  padding-top: 0.5rem;
+  padding-top: 1rem;
+  & > mat-form-field:first-child {
+    margin-top: 0.5rem;
+  }
 }
 
 .section-title {
