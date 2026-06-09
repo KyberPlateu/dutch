@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -71,6 +71,8 @@ export class DashboardShellComponent {
   private readonly preferences = inject(AppPreferencesService);
   private readonly currencyDisplay = inject(CurrencyDisplayService);
   private readonly dialog = inject(MatDialog);
+
+  protected readonly activeTab = signal<'friends' | 'groups' | 'activity'>('friends');
 
   protected readonly currencies = SUPPORTED_CURRENCIES;
   protected readonly globalCurrency = this.preferences.globalCurrency;

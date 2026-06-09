@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -76,6 +76,8 @@ export class AddExpenseDialogComponent {
   private readonly preferences = inject(AppPreferencesService);
   private readonly currencyDisplay = inject(CurrencyDisplayService);
 
+  @ViewChild('amountInput') amountInput!: ElementRef<HTMLInputElement>;
+
   protected readonly currentUserId = CURRENT_USER_ID;
   protected readonly currencies = SUPPORTED_CURRENCIES;
   private readonly routeGroupId = this.dialogData?.groupId ?? null;
@@ -85,6 +87,25 @@ export class AddExpenseDialogComponent {
   protected readonly total = signal('0.00');
   protected readonly date = signal(new Date());
   protected readonly time = signal(new Date().toTimeString().slice(0, 5));
+  
+  protected readonly dateString = computed(() => {
+    const d = this.date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
+
+  protected setDateString(dateStr: string): void {
+    if (dateStr) {
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        const next = new Date(this.date());
+        next.setFullYear(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        this.date.set(next);
+      }
+    }
+  }
   protected readonly splitMode = signal<SplitMode>('equal');
   protected readonly fxRateToUsd = signal<string | null>(null);
   protected readonly fxError = signal<string | null>(null);
@@ -171,6 +192,10 @@ export class AddExpenseDialogComponent {
     this.fxRateToUsd.set(null);
     this.fxError.set(null);
     this.resetDefaultAmounts();
+  }
+
+  protected focusAmount(): void {
+    this.amountInput?.nativeElement?.focus();
   }
 
   protected setTotal(total: string): void {

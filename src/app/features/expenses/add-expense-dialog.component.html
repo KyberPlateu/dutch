@@ -1,160 +1,152 @@
-<h2 mat-dialog-title class="dialog-header" style="display: flex; justify-content: space-between; align-items: center; margin: 0;">
-  <span>New expense</span>
-  <button mat-icon-button mat-dialog-close aria-label="Cancel" style="margin-right: -8px;">
-    <mat-icon>close</mat-icon>
-  </button>
-</h2>
-
-<mat-dialog-content class="expense-dialog-content">
-  <section class="quick-card">
-    <div class="quick-header">
-      <span class="scope-pill">
-        <mat-icon>{{ isGroupScoped() ? 'groups' : 'person_add' }}</mat-icon>
-        {{ scopeLabel() }}
-      </span>
-      <span class="member-count">{{ selectedParticipants().length }} people</span>
-      <span class="spacer"></span>
-      <div class="compact-date-picker" style="position: relative; width: 40px; height: 40px;">
-        <input
-          matInput
-          [matDatepicker]="picker"
-          [ngModel]="date()"
-          (ngModelChange)="date.set($event)"
-          style="position: absolute; width: 100%; height: 100%; opacity: 0; top: 0; left: 0; z-index: -1;"
-        />
-        <mat-datepicker-toggle [for]="picker" [matTooltip]="'Date: ' + (date() | date:'shortDate')" style="position: absolute; top: 0; left: 0;">
-        </mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-      </div>
+<div class="expense-dialog-wrapper">
+  <div class="dialog-header-modern">
+    <button mat-icon-button mat-dialog-close aria-label="Cancel">
+      <mat-icon>close</mat-icon>
+    </button>
+    <span class="dialog-title">New Expense</span>
+    <div class="compact-date-picker">
+      <input
+        type="date"
+        class="modern-date-input"
+        [ngModel]="dateString()"
+        (ngModelChange)="setDateString($event)"
+        aria-label="Transaction Date"
+      />
     </div>
+  </div>
 
-    <mat-form-field class="scope-field" appearance="outline">
-      <mat-label>Expense type</mat-label>
-      <mat-select
-        [ngModel]="selectedGroupId() ?? 'direct'"
-        (ngModelChange)="setExpenseScope($event)"
-      >
-        <mat-option value="direct">Direct expense</mat-option>
-        @for (group of groupOptions(); track group.groupId) {
-          <mat-option [value]="group.groupId">{{ group.name }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-
-    <div class="quick-entry">
-      <span class="expense-icon"><mat-icon>receipt_long</mat-icon></span>
-      <mat-form-field class="description-field" appearance="outline">
-        <mat-label>What was this for?</mat-label>
-        <input matInput [(ngModel)]="description" placeholder="Dinner, taxi, tickets" />
-      </mat-form-field>
-    </div>
-
-    <div class="amount-entry">
-      <mat-form-field class="currency-select" appearance="outline">
-        <mat-label>Currency</mat-label>
-        <mat-select [ngModel]="currency()" (ngModelChange)="setCurrency($event)">
-          @for (option of currencies; track option) {
-            <mat-option [value]="option">{{ option }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field class="amount-field" appearance="outline">
-        <mat-label>Total amount</mat-label>
+  <mat-dialog-content class="expense-dialog-content modern-scroll">
+    <section class="calculator-section">
+      <div class="amount-display-container">
+        <div class="currency-wrapper">
+          <select class="currency-select-invisible" [ngModel]="currency()" (ngModelChange)="setCurrency($event)">
+            @for (option of currencies; track option) {
+              <option [value]="option">{{ option }}</option>
+            }
+          </select>
+          <span class="currency-prefix" (click)="focusAmount()">{{ currency() }}</span>
+        </div>
         <input
-          matInput
-          class="amount-input"
+          #amountInput
+          class="massive-amount-input"
           inputmode="decimal"
           [ngModel]="total()"
           (ngModelChange)="setTotal($event)"
           placeholder="0.00"
+          autocomplete="off"
         />
-      </mat-form-field>
-    </div>
-
-    <button mat-stroked-button class="paid-split-summary" (click)="openSplitAdjustment()">
-      <div class="summary-text">
-        <span>Paid by <strong>{{ payerSummary() }}</strong></span>
-        <span>Split <strong>{{ splitModeLabel() }}</strong></span>
       </div>
-      <mat-icon>edit</mat-icon>
-    </button>
-
-    <div class="fx-card" [class.ready]="fxRateToUsd()">
-      <mat-icon>{{ fxRateToUsd() ? 'currency_exchange' : 'cloud_sync' }}</mat-icon>
-      <span>{{ fxLabel() }}</span>
-    </div>
-  </section>
-
-  <section class="panel participants-panel">
-    <div class="section-heading">
-      <div>
-        <h2>Participants</h2>
-        <p>{{ selectedNames() }}</p>
+      
+      <div class="expense-description-row">
+        <mat-icon class="desc-icon">receipt_long</mat-icon>
+        <input class="modern-desc-input" [(ngModel)]="description" placeholder="What was this for?" autocomplete="off" />
       </div>
-    </div>
+    </section>
 
-    <mat-form-field class="participant-search" appearance="outline">
-      <mat-label>Add participant</mat-label>
-      <mat-icon matPrefix>search</mat-icon>
-      <input
-        #participantInput
-        matInput
-        type="search"
-        [ngModel]="participantQuery()"
-        (ngModelChange)="setParticipantQuery($event)"
-        [matAutocomplete]="participantAutocomplete"
-        [placeholder]="isGroupScoped() ? 'Search group members' : 'Search friends'"
-      />
+    <section class="details-section">
+      <div class="scope-selector-container glass-panel">
+        <div class="scope-icon" [class.group-scope]="isGroupScoped()">
+          <mat-icon>{{ isGroupScoped() ? 'groups' : 'person' }}</mat-icon>
+        </div>
+        <select class="modern-scope-select" [ngModel]="selectedGroupId() ?? 'direct'" (ngModelChange)="setExpenseScope($event)">
+          <option value="direct">Direct expense</option>
+          @for (group of groupOptions(); track group.groupId) {
+            <option [value]="group.groupId">{{ group.name }}</option>
+          }
+        </select>
+        <mat-icon class="dropdown-icon">expand_more</mat-icon>
+      </div>
+
+      <button class="paid-split-summary-modern glass-panel" (click)="openSplitAdjustment()">
+        <div class="summary-text">
+          <span class="summary-label">Paid by</span>
+          <span class="summary-value">{{ payerSummary() }}</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-text">
+          <span class="summary-label">Split</span>
+          <span class="summary-value">{{ splitModeLabel() }}</span>
+        </div>
+        <mat-icon class="edit-icon">chevron_right</mat-icon>
+      </button>
+
+      <div class="fx-card-modern" [class.ready]="fxRateToUsd()">
+        <mat-icon>{{ fxRateToUsd() ? 'currency_exchange' : 'cloud_sync' }}</mat-icon>
+        <span>{{ fxLabel() }}</span>
+      </div>
+    </section>
+
+    <section class="participants-section glass-panel">
+      <div class="section-heading-modern">
+        <h3>Participants</h3>
+        <span class="participant-count">{{ selectedParticipants().length }} people</span>
+      </div>
+
+      @if (selectedParticipants().length > 0) {
+        <div class="participant-chips-modern">
+          @for (participant of selectedParticipants(); track participant.userId) {
+            <div class="modern-chip">
+              <div class="chip-avatar">{{ nameFor(participant.userId).charAt(0) }}</div>
+              <span class="chip-label">{{ nameFor(participant.userId) }}</span>
+              <button class="chip-remove" (click)="removeParticipant(participant.userId)" [attr.aria-label]="'Remove ' + nameFor(participant.userId)">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="empty-selection-modern">Add at least two people to split the cost.</p>
+      }
+
+      <div class="search-input-wrapper">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          #participantInput
+          class="modern-search-input"
+          type="search"
+          [ngModel]="participantQuery()"
+          (ngModelChange)="setParticipantQuery($event)"
+          [matAutocomplete]="participantAutocomplete"
+          [placeholder]="isGroupScoped() ? 'Search group members' : 'Search friends'"
+        />
+      </div>
       <mat-autocomplete
         #participantAutocomplete="matAutocomplete"
         (optionSelected)="addParticipant($event.option.value, participantInput)"
+        class="modern-autocomplete"
       >
         @for (member of participantSuggestions(); track member.friendId) {
-          <mat-option [value]="member.friendId">
-            <span>{{ member.displayName }}</span>
-            <small>{{ member.friendId === currentUserId ? 'You' : member.phoneNumber }}</small>
+          <mat-option [value]="member.friendId" class="modern-option">
+            <div class="option-avatar">{{ member.displayName.charAt(0) }}</div>
+            <div class="option-details">
+              <span class="option-name">{{ member.displayName }}</span>
+              <span class="option-sub">{{ member.friendId === currentUserId ? 'You' : member.phoneNumber }}</span>
+            </div>
           </mat-option>
         } @empty {
-          <mat-option disabled>No matching people</mat-option>
+          <mat-option disabled class="modern-option-disabled">No matching people</mat-option>
         }
       </mat-autocomplete>
-    </mat-form-field>
+    </section>
+  </mat-dialog-content>
 
-    @if (selectedParticipants().length > 0) {
-      <mat-chip-set class="participant-chips" aria-label="Selected participants">
-        @for (participant of selectedParticipants(); track participant.userId) {
-          <mat-chip (removed)="removeParticipant(participant.userId)">
-            <span>{{ nameFor(participant.userId) }}</span>
-            <button
-              matChipRemove
-              type="button"
-              [attr.aria-label]="'Remove ' + nameFor(participant.userId)"
-            >
-              <mat-icon>close</mat-icon>
-            </button>
-          </mat-chip>
-        }
-      </mat-chip-set>
-    } @else {
-      <p class="empty-selection">Search and add at least two people.</p>
+  <div class="dialog-footer-modern" [class.invalid]="validationMessage()">
+    @if (validationMessage()) {
+      <div class="validation-toast">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ validationMessage() }}</span>
+      </div>
     }
-  </section>
-</mat-dialog-content>
-
-<mat-dialog-actions align="end" class="dialog-actions" [class.invalid]="validationMessage()">
-  <div class="validation-summary">
-    <strong>{{ validationMessage() || 'Ready to save.' }}</strong>
+    <button
+      class="save-btn-massive"
+      type="button"
+      [disabled]="saving() || validationMessage()"
+      (click)="save()"
+    >
+      <span>{{ saving() ? 'Saving...' : 'Save Expense' }}</span>
+      @if (!saving()) {
+        <mat-icon>check</mat-icon>
+      }
+    </button>
   </div>
-  <button mat-button mat-dialog-close>Cancel</button>
-  <button
-    mat-flat-button
-    color="primary"
-    type="button"
-    [disabled]="saving() || validationMessage()"
-    (click)="save()"
-  >
-    <mat-icon>check</mat-icon>
-    Save expense
-  </button>
-</mat-dialog-actions>
+</div>

@@ -1,28 +1,43 @@
 <main class="group-page">
-  <mat-toolbar class="topbar">
+  <mat-toolbar class="topbar glass-panel-top">
     <a mat-icon-button routerLink="/" aria-label="Back to dashboard">
       <mat-icon>arrow_back</mat-icon>
     </a>
-    <span>{{ group()?.name ?? 'Group' }}</span>
+    <span class="toolbar-title">{{ group()?.name ?? 'Group' }}</span>
     <span class="spacer"></span>
     <app-theme-selector />
-    <button mat-flat-button color="primary" type="button" (click)="openAddExpense()">
+    <button mat-flat-button class="action-btn-primary" type="button" (click)="openAddExpense()">
       <mat-icon>add</mat-icon>
-      Add expense
+      <span class="hide-on-mobile">Add expense</span>
     </button>
   </mat-toolbar>
 
-  <section class="group-grid">
-    <header class="hero-panel">
-      <p class="eyebrow">Active group</p>
-      <div class="hero-title">
+  <section class="group-hero-container">
+    <div class="hero-background animate-slide-up"></div>
+    <div class="hero-content animate-slide-up">
+      <p class="eyebrow">Active Group</p>
+      <div class="hero-title-row">
         <h1>{{ group()?.name ?? 'Group' }}</h1>
-        <button mat-stroked-button type="button" (click)="openManageGroup()">
-          <mat-icon>manage_accounts</mat-icon>
-          Manage group
+        <button mat-icon-button (click)="openManageGroup()" class="hero-manage-btn" aria-label="Manage Group">
+          <mat-icon>settings</mat-icon>
         </button>
       </div>
-      <div class="facepile" (click)="openManageGroup()" matTooltip="Manage group" style="cursor: pointer; display: flex; flex-direction: row-reverse; justify-content: flex-end;">
+      <div class="hero-metrics">
+        <div class="metric-block">
+          <span class="metric-label">Members</span>
+          <span class="metric-value">{{ members().length }}</span>
+        </div>
+        <div class="metric-divider"></div>
+        <div class="metric-block">
+          <span class="metric-label">Expenses</span>
+          <span class="metric-value">{{ activity().length }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Facepile positioned on the boundary -->
+    <div class="facepile-container animate-slide-up" style="animation-delay: 0.1s;">
+      <div class="facepile" (click)="openManageGroup()" matTooltip="Manage group members">
         @if (members().length > 5) {
           <span class="avatar facepile-avatar more">+{{ members().length - 5 }}</span>
         }
@@ -30,46 +45,66 @@
           <span class="avatar facepile-avatar" [matTooltip]="member.displayName">{{ initials(member.displayName) }}</span>
         }
       </div>
-    </header>
+      <button class="add-member-fab" (click)="openManageGroup()">
+        <mat-icon>person_add</mat-icon>
+      </button>
+    </div>
+  </section>
 
-    <section class="panel">
-      <h2>Balances</h2>
-      <mat-list>
+  <section class="group-grid">
+    <section class="panel glass-panel animate-slide-up" style="animation-delay: 0.15s;">
+      <div class="panel-header">
+        <h2>Balances</h2>
+      </div>
+      <mat-list class="banking-list">
         @for (balance of balances(); track balanceKey(balance)) {
-          <mat-list-item>
-            <mat-icon matListItemIcon [class.negative]="balance.fromUserId === currentUserId">
-              {{ balance.fromUserId === currentUserId ? 'trending_down' : 'trending_up' }}
-            </mat-icon>
-            <span matListItemTitle>{{ balanceText(balance) }}</span>
-            <span matListItemLine>{{ money(balance.amountUsdMicros) }}</span>
+          <mat-list-item class="banking-list-item">
+            <div matListItemIcon class="banking-icon" [class.negative-bg]="balance.fromUserId === currentUserId" [class.positive-bg]="balance.fromUserId !== currentUserId">
+              <mat-icon>{{ balance.fromUserId === currentUserId ? 'call_made' : 'call_received' }}</mat-icon>
+            </div>
+            <span matListItemTitle class="banking-title">{{ balanceText(balance) }}</span>
+            <span matListItemLine class="banking-amount" [class.negative-text]="balance.fromUserId === currentUserId" [class.positive-text]="balance.fromUserId !== currentUserId">
+              {{ money(balance.amountUsdMicros) }}
+            </span>
           </mat-list-item>
         } @empty {
-          <p class="empty-state">This group is settled up.</p>
+          <div class="empty-state-modern">
+            <div class="empty-icon"><mat-icon>check_circle</mat-icon></div>
+            <p>This group is settled up.</p>
+          </div>
         }
       </mat-list>
     </section>
 
-    <section class="panel activity-panel">
-      <h2>Activity feed</h2>
-      @for (item of activity(); track item.eventId) {
-        <article class="activity-row">
-          <mat-icon>{{ iconFor(item.eventType) }}</mat-icon>
-          <div>
-            <strong>{{ item.summary }}</strong>
-            <p>
-              <span class="event-tag" [class.group-event]="item.tag === 'group'">{{
-                tagText(item.tag)
-              }}</span>
-              {{ item.createdAt | date: 'MMM d, h:mm a' }}
+    <section class="panel glass-panel activity-panel animate-slide-up" style="animation-delay: 0.2s;">
+      <div class="panel-header">
+        <h2>Activity feed</h2>
+      </div>
+      <div class="activity-timeline">
+        @for (item of activity(); track item.eventId) {
+          <article class="activity-row">
+            <div class="timeline-node">
+              <div class="timeline-icon"><mat-icon>{{ iconFor(item.eventType) }}</mat-icon></div>
+              <div class="timeline-line"></div>
+            </div>
+            <div class="activity-content">
+              <strong>{{ item.summary }}</strong>
+              <div class="activity-meta">
+                <span class="event-tag" [class.group-event]="item.tag === 'group'">{{ tagText(item.tag) }}</span>
+                <span>{{ item.createdAt | date: 'MMM d, h:mm a' }}</span>
+              </div>
               @if (item.amountUsdMicros) {
-                · {{ money(item.amountUsdMicros) }}
+                <div class="activity-amount">{{ money(item.amountUsdMicros) }}</div>
               }
-            </p>
+            </div>
+          </article>
+        } @empty {
+          <div class="empty-state-modern">
+            <div class="empty-icon"><mat-icon>receipt_long</mat-icon></div>
+            <p>Add an expense to start the group ledger.</p>
           </div>
-        </article>
-      } @empty {
-        <p class="empty-state">Add an expense to start the group ledger.</p>
-      }
+        }
+      </div>
     </section>
   </section>
 </main>

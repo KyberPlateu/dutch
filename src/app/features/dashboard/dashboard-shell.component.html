@@ -1,8 +1,8 @@
 <main class="dashboard-page">
-  <mat-toolbar class="topbar">
+  <mat-toolbar class="topbar glass-panel-top">
     <div class="brand">
       <span class="brand-mark">D</span>
-      <span>Dutch</span>
+      <span class="brand-text">Dutch</span>
     </div>
     <span class="spacer"></span>
     <span class="sync-pill" [class.pending]="sync().pendingEvents > 0">
@@ -12,62 +12,33 @@
   </mat-toolbar>
 
   @if (sync().syncing) {
-    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    <mat-progress-bar mode="indeterminate" class="sync-progress"></mat-progress-bar>
   }
 
-  <section class="dashboard-grid">
-    <section class="balance-panel">
-      <div class="wallet-card">
-        <div class="wallet-header">
-          <p class="wallet-eyebrow">Total Balance</p>
-          <div class="currency-compact">
-            {{ globalCurrency() }}
-            <select [ngModel]="globalCurrency()" (ngModelChange)="setGlobalCurrency($event)" class="currency-select" aria-label="Global currency">
-              @for (currency of currencies; track currency) {
-                <option [value]="currency">{{ currency }}</option>
-              }
-            </select>
-            <mat-icon>expand_more</mat-icon>
-          </div>
-        </div>
-
-        <div class="wallet-balance">
-          @if (dashboard().totalYouAreOwedUsdMicros - dashboard().totalYouOweUsdMicros > 0) {
-            <h1>{{ money(dashboard().totalYouAreOwedUsdMicros - dashboard().totalYouOweUsdMicros) }}</h1>
-            <p class="balance-status">You are owed in total</p>
-          } @else if (dashboard().totalYouAreOwedUsdMicros - dashboard().totalYouOweUsdMicros < 0) {
-            <h1>{{ money(dashboard().totalYouOweUsdMicros - dashboard().totalYouAreOwedUsdMicros) }}</h1>
-            <p class="balance-status">You owe in total</p>
-          } @else {
-            <h1>{{ money(0) }}</h1>
-            <p class="balance-status">Settled up</p>
-          }
-        </div>
-
-        <div class="wallet-metrics">
-          <div class="metric-pill positive-bg">
-            <mat-icon class="metric-icon">arrow_downward</mat-icon>
-            <div class="metric-info">
-              <span class="metric-label">Owed to you</span>
-              <span class="metric-value">{{ money(dashboard().totalYouAreOwedUsdMicros) }}</span>
-            </div>
-          </div>
-          <div class="metric-pill negative-bg">
-            <mat-icon class="metric-icon">arrow_upward</mat-icon>
-            <div class="metric-info">
-              <span class="metric-label">You owe</span>
-              <span class="metric-value">{{ money(dashboard().totalYouOweUsdMicros) }}</span>
-            </div>
-          </div>
-        </div>
+  <div class="app-layout">
+    <!-- Desktop Side Navigation -->
+    <nav class="side-nav glass-panel">
+      <div class="nav-links">
+        <button class="nav-item" [class.active]="activeTab() === 'friends'" (click)="activeTab.set('friends')">
+          <mat-icon>group</mat-icon>
+          <span>Friends</span>
+        </button>
+        <button class="nav-item" [class.active]="activeTab() === 'groups'" (click)="activeTab.set('groups')">
+          <mat-icon>folder_shared</mat-icon>
+          <span>Groups</span>
+        </button>
+        <button class="nav-item" [class.active]="activeTab() === 'activity'" (click)="activeTab.set('activity')">
+          <mat-icon>history</mat-icon>
+          <span>Activity</span>
+        </button>
       </div>
 
-      <div class="action-grid">
-        <button class="action-btn primary-action" type="button" (click)="openAddExpense()">
-          <div class="icon-circle primary-icon">
-            <mat-icon>add</mat-icon>
+      <div class="nav-actions">
+        <button class="action-btn" type="button" (click)="openAddExpense()">
+          <div class="icon-circle" style="background: var(--dutch-primary-soft); color: var(--dutch-primary);">
+            <mat-icon>add_circle</mat-icon>
           </div>
-          <span>Add expense</span>
+          <span style="color: var(--dutch-primary); font-weight: 700;">Add expense</span>
         </button>
         <button class="action-btn" type="button" (click)="openAddFriend()">
           <div class="icon-circle">
@@ -82,13 +53,70 @@
           <span>Create group</span>
         </button>
       </div>
-    </section>
+    </nav>
 
-    <section class="lists-panel">
+    <!-- Main Content Feed -->
+    <section class="main-feed">
+      <!-- Premium Wallet Card -->
+      <div class="premium-wallet-card animate-slide-up">
+        <div class="wallet-background"></div>
+        <div class="wallet-glass-overlay"></div>
+        <div class="wallet-content">
+          <div class="wallet-header">
+            <p class="wallet-eyebrow">Total Balance</p>
+            <div class="currency-compact">
+              {{ globalCurrency() }}
+              <select [ngModel]="globalCurrency()" (ngModelChange)="setGlobalCurrency($event)" class="currency-select" aria-label="Global currency">
+                @for (currency of currencies; track currency) {
+                  <option [value]="currency">{{ currency }}</option>
+                }
+              </select>
+              <mat-icon>expand_more</mat-icon>
+            </div>
+          </div>
 
+          <div class="wallet-balance">
+            @if (dashboard().totalYouAreOwedUsdMicros - dashboard().totalYouOweUsdMicros > 0) {
+              <h1>{{ money(dashboard().totalYouAreOwedUsdMicros - dashboard().totalYouOweUsdMicros) }}</h1>
+              <p class="balance-status positive-glow">You are owed in total</p>
+            } @else if (dashboard().totalYouAreOwedUsdMicros - dashboard().totalYouOweUsdMicros < 0) {
+              <h1>{{ money(dashboard().totalYouOweUsdMicros - dashboard().totalYouAreOwedUsdMicros) }}</h1>
+              <p class="balance-status negative-glow">You owe in total</p>
+            } @else {
+              <h1>{{ money(0) }}</h1>
+              <p class="balance-status">Settled up</p>
+            }
+          </div>
 
-      <mat-tab-group animationDuration="160ms">
-        <mat-tab label="Friends">
+          <div class="wallet-metrics">
+            <div class="metric-pill">
+              <div class="metric-icon positive">
+                <mat-icon>arrow_downward</mat-icon>
+              </div>
+              <div class="metric-info">
+                <span class="metric-label">Owed to you</span>
+                <span class="metric-value">{{ money(dashboard().totalYouAreOwedUsdMicros) }}</span>
+              </div>
+            </div>
+            <div class="metric-pill">
+              <div class="metric-icon negative">
+                <mat-icon>arrow_upward</mat-icon>
+              </div>
+              <div class="metric-info">
+                <span class="metric-label">You owe</span>
+                <span class="metric-value">{{ money(dashboard().totalYouOweUsdMicros) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Lists (Switched by activeTab) -->
+      <section class="lists-panel glass-panel animate-slide-up" style="animation-delay: 0.1s;">
+        @if (activeTab() === 'friends') {
+          <div class="list-header">
+            <h2>Friends</h2>
+          </div>
           <mat-nav-list class="entity-list">
             @for (friend of dashboard().friendBalances; track friend.friendId) {
               <a mat-list-item>
@@ -107,9 +135,12 @@
               <p class="empty-state">Add friends by phone number to start splitting expenses.</p>
             }
           </mat-nav-list>
-        </mat-tab>
+        }
 
-        <mat-tab label="Groups">
+        @if (activeTab() === 'groups') {
+          <div class="list-header">
+            <h2>Groups</h2>
+          </div>
           <mat-nav-list class="entity-list">
             @for (group of dashboard().groupSummaries; track group.groupId) {
               <a mat-list-item [routerLink]="['/groups', group.groupId]">
@@ -126,17 +157,16 @@
                   {{ groupText(group.netUsdMicros) }}
                 </span>
               </a>
+            } @empty {
+              <p class="empty-state">Create a group to start sharing expenses.</p>
             }
           </mat-nav-list>
-        </mat-tab>
+        }
 
-        <mat-tab>
-          <ng-template mat-tab-label>
-            Activity
-            @if (dashboard().pendingApprovalCount > 0) {
-              <span class="tab-badge" [matBadge]="dashboard().pendingApprovalCount"></span>
-            }
-          </ng-template>
+        @if (activeTab() === 'activity') {
+          <div class="list-header mobile-only-header">
+            <h2>Activity</h2>
+          </div>
           <mat-list class="activity-list">
             @for (item of dashboard().recentActivity; track item.eventId) {
               <mat-list-item>
@@ -145,41 +175,72 @@
                 <span matListItemLine>
                   {{ item.createdAt | date: 'MMM d, h:mm a' }}
                   @if (item.amountUsdMicros) {
-                    · {{ money(item.amountUsdMicros) }}
+                    · <strong class="activity-amount">{{ money(item.amountUsdMicros) }}</strong>
                   }
                 </span>
               </mat-list-item>
             } @empty {
-              <p class="empty-state">
-                Expenses and payments will appear here as event-log entries.
-              </p>
+              <p class="empty-state">Expenses and payments will appear here.</p>
             }
           </mat-list>
-        </mat-tab>
-      </mat-tab-group>
+        }
+      </section>
     </section>
 
-    <aside class="desktop-activity">
-      <h2>Event log</h2>
-      @for (item of dashboard().recentActivity; track item.eventId) {
-        <div class="activity-card">
-          <mat-icon>{{ iconFor(item.eventType) }}</mat-icon>
-          <div>
-            <strong>{{ item.summary }}</strong>
-            <p>
-              <span class="event-tag" [class.group-event]="item.tag === 'group'">{{
-                tagText(item.tag)
-              }}</span>
-              {{ item.createdAt | date: 'MMM d, h:mm a' }}
+    <!-- Desktop Activity Pane -->
+    <aside class="desktop-activity glass-panel animate-slide-up" style="animation-delay: 0.2s;">
+      <div class="pane-header">
+        <h2>Event log</h2>
+        @if (dashboard().pendingApprovalCount > 0) {
+          <span class="badge">{{ dashboard().pendingApprovalCount }} pending</span>
+        }
+      </div>
+      <div class="activity-cards">
+        @for (item of dashboard().recentActivity; track item.eventId) {
+          <div class="activity-card">
+            <div class="activity-icon-wrap">
+              <mat-icon>{{ iconFor(item.eventType) }}</mat-icon>
+            </div>
+            <div class="activity-details">
+              <strong>{{ item.summary }}</strong>
+              <p>
+                <span class="event-tag" [class.group-event]="item.tag === 'group'">{{ tagText(item.tag) }}</span>
+                {{ item.createdAt | date: 'MMM d, h:mm a' }}
+              </p>
               @if (item.amountUsdMicros) {
-                · {{ money(item.amountUsdMicros) }}
+                <div class="activity-card-amount">{{ money(item.amountUsdMicros) }}</div>
               }
-            </p>
+            </div>
           </div>
-        </div>
-      } @empty {
-        <p class="empty-state">No events yet.</p>
-      }
+        } @empty {
+          <p class="empty-state">No events yet.</p>
+        }
+      </div>
     </aside>
-  </section>
+  </div>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item" [class.active]="activeTab() === 'friends'" (click)="activeTab.set('friends')">
+      <mat-icon>group</mat-icon>
+      <span>Friends</span>
+    </button>
+    <button class="nav-item" [class.active]="activeTab() === 'groups'" (click)="activeTab.set('groups')">
+      <mat-icon>folder_shared</mat-icon>
+      <span>Groups</span>
+    </button>
+    <button class="nav-item" [class.active]="activeTab() === 'activity'" (click)="activeTab.set('activity')">
+      <mat-icon>history</mat-icon>
+      <span>Activity</span>
+      @if (dashboard().pendingApprovalCount > 0) {
+        <span class="badge-dot"></span>
+      }
+    </button>
+  </nav>
+
+  <!-- Global Floating Action Button -->
+  <button class="fab-primary" type="button" (click)="openAddExpense()" aria-label="Add Expense">
+    <mat-icon>add</mat-icon>
+  </button>
 </main>
+
