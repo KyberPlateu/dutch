@@ -8,6 +8,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   ActivityFeedItem,
@@ -20,6 +21,7 @@ import {
 import { CurrencyDisplayService } from '../../core/currency-display.service';
 import { ThemeSelectorComponent } from '../../shared/theme-selector.component';
 import { GroupEditorDialogComponent } from './group-editor-dialog.component';
+import { AddExpenseDialogComponent } from '../expenses/add-expense-dialog.component';
 
 @Component({
   selector: 'app-group-detail',
@@ -33,6 +35,7 @@ import { GroupEditorDialogComponent } from './group-editor-dialog.component';
     MatIconModule,
     MatListModule,
     MatToolbarModule,
+    MatTooltipModule,
     RouterLink,
     ThemeSelectorComponent,
   ],
@@ -109,6 +112,16 @@ export class GroupDetailComponent {
     this.dialog.open(GroupEditorDialogComponent, {
       autoFocus: 'first-tabbable',
       width: 'min(34rem, 94vw)',
+      data: { groupId: this.groupId },
+    });
+  }
+
+  protected openAddExpense(): void {
+    this.dialog.open(AddExpenseDialogComponent, {
+      autoFocus: 'first-tabbable',
+      width: 'min(36rem, 96vw)',
+      maxWidth: '100vw',
+      panelClass: 'expense-dialog-container',
       data: { groupId: this.groupId },
     });
   }

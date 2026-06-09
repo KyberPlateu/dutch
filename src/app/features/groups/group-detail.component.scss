@@ -140,3 +140,37 @@ h2 {
     grid-column: 1 / -1;
   }
 }
+
+.facepile {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  align-items: center;
+  cursor: pointer;
+}
+
+.facepile-avatar {
+  width: 2rem;
+  height: 2rem;
+  margin-right: -0.5rem;
+  border: 2px solid var(--dutch-panel);
+  border-radius: 999px;
+  background: var(--dutch-primary-soft);
+  color: var(--dutch-primary);
+  font-size: 0.875rem;
+  position: relative;
+  transition: transform 0.2s;
+}
+
+.facepile:hover .facepile-avatar {
+  transform: translateX(-0.25rem);
+}
+.facepile:hover .facepile-avatar:first-child {
+  transform: none;
+}
+
+.facepile-avatar.more {
+  background: var(--dutch-secondary-soft);
+  color: var(--dutch-secondary-strong);
+  z-index: 1;
+}

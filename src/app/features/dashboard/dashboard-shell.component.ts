@@ -24,6 +24,7 @@ import {
 import { AddFriendDialogComponent } from '../friends/add-friend-dialog.component';
 import { GroupEditorDialogComponent } from '../groups/group-editor-dialog.component';
 import { ThemeSelectorComponent } from '../../shared/theme-selector.component';
+import { AddExpenseDialogComponent } from '../expenses/add-expense-dialog.component';
 
 const EMPTY_DASHBOARD: DashboardAggregate = {
   totalYouOweUsdMicros: 0,
@@ -104,6 +105,15 @@ export class DashboardShellComponent {
     this.dialog.open(GroupEditorDialogComponent, {
       autoFocus: 'first-tabbable',
       width: 'min(34rem, 94vw)',
+    });
+  }
+
+  protected openAddExpense(): void {
+    this.dialog.open(AddExpenseDialogComponent, {
+      autoFocus: 'first-tabbable',
+      width: 'min(36rem, 96vw)',
+      maxWidth: '100vw',
+      panelClass: 'expense-dialog-container',
     });
   }
 

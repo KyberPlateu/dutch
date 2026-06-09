@@ -13,9 +13,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import Decimal from 'decimal.js';
+import { SplitAdjustmentDialogComponent } from './split-adjustment-dialog.component';
 import { AppPreferencesService, SUPPORTED_CURRENCIES } from '../../core/app-preferences.service';
 import { CurrencyDisplayService } from '../../core/currency-display.service';
 import {
@@ -32,7 +33,6 @@ import {
   splitPercentMinorUnits,
 } from '../../core/event-sourcing.service';
 import { sampleFxRateToUsd } from '../../core/fx-rates';
-import { ThemeSelectorComponent } from '../../shared/theme-selector.component';
 
 interface MoneyRow {
   userId: string;
@@ -45,7 +45,7 @@ interface ParticipantRow extends MoneyRow {
 }
 
 @Component({
-  selector: 'app-add-expense-flow',
+  selector: 'app-add-expense-dialog',
   standalone: true,
   imports: [
     CommonModule,
@@ -55,22 +55,22 @@ interface ParticipantRow extends MoneyRow {
     MatButtonToggleModule,
     MatChipsModule,
     MatDatepickerModule,
+    MatDialogModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
     MatNativeDateModule,
     MatSelectModule,
     MatSnackBarModule,
-    MatToolbarModule,
-    RouterLink,
-    ThemeSelectorComponent,
+    MatTooltipModule,
   ],
-  templateUrl: './add-expense-flow.component.html',
-  styleUrl: './add-expense-flow.component.scss',
+  templateUrl: './add-expense-dialog.component.html',
+  styleUrl: './add-expense-dialog.component.scss',
 })
-export class AddExpenseFlowComponent {
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
+export class AddExpenseDialogComponent {
+  private readonly dialogRef = inject(MatDialogRef<AddExpenseDialogComponent>);
+  private readonly dialogData = inject<{ groupId?: string }>(MAT_DIALOG_DATA, { optional: true });
+  private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
   private readonly eventService = inject(EventSourcingService);
   private readonly preferences = inject(AppPreferencesService);
@@ -78,7 +78,7 @@ export class AddExpenseFlowComponent {
 
   protected readonly currentUserId = CURRENT_USER_ID;
   protected readonly currencies = SUPPORTED_CURRENCIES;
-  private readonly routeGroupId = this.route.snapshot.paramMap.get('groupId');
+  private readonly routeGroupId = this.dialogData?.groupId ?? null;
   protected readonly selectedGroupId = signal<string | null>(this.routeGroupId);
   protected readonly description = signal('');
   protected readonly currency = signal<string>(this.preferences.globalCurrency());
@@ -149,10 +149,6 @@ export class AddExpenseFlowComponent {
     return Boolean(this.selectedGroupId());
   }
 
-  protected backLink(): string {
-    return this.routeGroupId ? `/groups/${this.routeGroupId}` : '/';
-  }
-
   protected groupOptions(): Group[] {
     return this.groups;
   }
@@ -191,6 +187,30 @@ export class AddExpenseFlowComponent {
 
   protected setParticipantQuery(query: string): void {
     this.participantQuery.set(query);
+  }
+
+  protected openSplitAdjustment(): void {
+    const dialogRef = this.dialog.open(SplitAdjustmentDialogComponent, {
+      width: 'min(36rem, 96vw)',
+      data: {
+        splitMode: this.splitMode(),
+        payers: this.payers(),
+        participants: this.participants(),
+        members: this.selectedMembers(),
+        nameFor: (id: string) => this.nameFor(id),
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.splitMode.set(result.splitMode);
+        this.payers.set(result.payers);
+        this.participants.set(result.participants);
+        if (result.splitMode === 'equal' || result.splitMode === 'percent') {
+            this.resetSplitAmounts();
+        }
+      }
+    });
   }
 
   protected addParticipant(userId: string, input?: HTMLInputElement): void {
@@ -276,7 +296,7 @@ export class AddExpenseFlowComponent {
 
       await this.eventService.createExpense(input);
       this.snackBar.open('Expense saved to the local event log.', 'OK', { duration: 2600 });
-      await this.router.navigate(['/groups', groupId]);
+      this.dialogRef.close(true);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Could not save expense.';
       this.fxError.set(message);

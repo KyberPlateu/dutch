@@ -1,0 +1,91 @@
+<h2 mat-dialog-title>
+  Adjust Split
+  <button mat-icon-button mat-dialog-close aria-label="Cancel" style="float: right; margin-top: -8px; margin-right: -8px;">
+    <mat-icon>close</mat-icon>
+  </button>
+</h2>
+
+<mat-dialog-content class="split-dialog-content">
+  <section class="split-section">
+    <div class="section-heading">
+      <div>
+        <h3>Who paid?</h3>
+      </div>
+      <button mat-stroked-button type="button" (click)="addPayer()">
+        <mat-icon>add</mat-icon>
+        Add payer
+      </button>
+    </div>
+
+    @for (payer of payers; track payer.userId; let index = $index) {
+      <div class="row-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Payer</mat-label>
+          <mat-select [(ngModel)]="payer.userId">
+            @for (member of data.members; track member.friendId) {
+              <mat-option [value]="member.friendId">{{ member.displayName }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Amount</mat-label>
+          <input
+            matInput
+            inputmode="decimal"
+            [(ngModel)]="payer.amount"
+          />
+        </mat-form-field>
+        <button
+          mat-icon-button
+          type="button"
+          [disabled]="payers.length === 1"
+          (click)="removePayer(index)"
+        >
+          <mat-icon>remove_circle</mat-icon>
+        </button>
+      </div>
+    }
+  </section>
+
+  <section class="split-section">
+    <div class="section-heading">
+      <div>
+        <h3>Split mode</h3>
+      </div>
+      <mat-button-toggle-group [(ngModel)]="splitMode">
+        <mat-button-toggle value="equal">Equal</mat-button-toggle>
+        <mat-button-toggle value="exact">Exact</mat-button-toggle>
+        <mat-button-toggle value="percent">%</mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+
+    @for (participant of selectedParticipants(); track participant.userId) {
+      <div class="row-grid split-row">
+        <div class="person-name">{{ data.nameFor(participant.userId) }}</div>
+        <mat-form-field appearance="outline">
+          <mat-label>Percent</mat-label>
+          <input
+            matInput
+            inputmode="decimal"
+            [disabled]="splitMode !== 'percent'"
+            [(ngModel)]="participant.percent"
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Owes</mat-label>
+          <input
+            matInput
+            inputmode="decimal"
+            [disabled]="splitMode !== 'exact'"
+            [(ngModel)]="participant.amount"
+          />
+        </mat-form-field>
+      </div>
+    }
+  </section>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()">Done</button>
+</mat-dialog-actions>

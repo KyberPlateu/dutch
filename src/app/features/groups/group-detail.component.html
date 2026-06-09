@@ -6,10 +6,10 @@
     <span>{{ group()?.name ?? 'Group' }}</span>
     <span class="spacer"></span>
     <app-theme-selector />
-    <a mat-flat-button color="primary" [routerLink]="['/groups', groupId, 'expenses', 'new']">
+    <button mat-flat-button color="primary" type="button" (click)="openAddExpense()">
       <mat-icon>add</mat-icon>
       Add expense
-    </a>
+    </button>
   </mat-toolbar>
 
   <section class="group-grid">
@@ -22,14 +22,14 @@
           Manage group
         </button>
       </div>
-      <mat-chip-set>
-        @for (member of members(); track member.friendId) {
-          <mat-chip>
-            <span class="avatar">{{ initials(member.displayName) }}</span>
-            {{ member.displayName }}
-          </mat-chip>
+      <div class="facepile" (click)="openManageGroup()" matTooltip="Manage group" style="cursor: pointer; display: flex; flex-direction: row-reverse; justify-content: flex-end;">
+        @if (members().length > 5) {
+          <span class="avatar facepile-avatar more">+{{ members().length - 5 }}</span>
         }
-      </mat-chip-set>
+        @for (member of members().slice(0, 5).reverse(); track member.friendId) {
+          <span class="avatar facepile-avatar" [matTooltip]="member.displayName">{{ initials(member.displayName) }}</span>
+        }
+      </div>
     </header>
 
     <section class="panel">

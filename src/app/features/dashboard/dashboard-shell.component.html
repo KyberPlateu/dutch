@@ -9,12 +9,6 @@
       {{ syncLabel() }}
     </span>
     <app-theme-selector />
-    <button mat-icon-button type="button" aria-label="Add friend" (click)="openAddFriend()">
-      <mat-icon>person_add</mat-icon>
-    </button>
-    <button mat-icon-button type="button" aria-label="Create group" (click)="openCreateGroup()">
-      <mat-icon>group_add</mat-icon>
-    </button>
   </mat-toolbar>
 
   @if (sync().syncing) {
@@ -38,10 +32,10 @@
         </mat-select>
       </mat-form-field>
       <div class="quick-actions">
-        <a mat-flat-button color="primary" routerLink="/expenses/new">
+        <button mat-flat-button color="primary" type="button" (click)="openAddExpense()">
           <mat-icon>add</mat-icon>
           Add expense
-        </a>
+        </button>
         <button mat-stroked-button type="button" (click)="openAddFriend()">
           <mat-icon>person_add</mat-icon>
           Add friend
@@ -54,24 +48,7 @@
     </section>
 
     <section class="lists-panel">
-      <section class="group-overview">
-        <div class="section-title">
-          <h2>Groups</h2>
-          <button mat-button type="button" (click)="openCreateGroup()">
-            <mat-icon>add</mat-icon>
-            Create
-          </button>
-        </div>
-        @for (group of dashboard().groupSummaries; track group.groupId) {
-          <a class="group-pill" [routerLink]="['/groups', group.groupId]">
-            <span class="avatar group-avatar">{{ group.name.slice(0, 1) }}</span>
-            <span>
-              <strong>{{ group.name }}</strong>
-              <small>{{ groupText(group.netUsdMicros) }}</small>
-            </span>
-          </a>
-        }
-      </section>
+
 
       <mat-tab-group animationDuration="160ms">
         <mat-tab label="Friends">
