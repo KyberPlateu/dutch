@@ -17,32 +17,69 @@
 
   <section class="dashboard-grid">
     <section class="balance-panel">
-      <p class="eyebrow">Overall balance</p>
-      <h1>You are owed {{ money(dashboard().totalYouAreOwedUsdMicros) }}</h1>
-      <div class="balance-row">
-        <span class="positive">Owed to you {{ money(dashboard().totalYouAreOwedUsdMicros) }}</span>
-        <span class="negative">You owe {{ money(dashboard().totalYouOweUsdMicros) }}</span>
-      </div>
-      <mat-form-field class="currency-field" appearance="outline">
-        <mat-label>Global currency</mat-label>
-        <mat-select [ngModel]="globalCurrency()" (ngModelChange)="setGlobalCurrency($event)">
-          @for (currency of currencies; track currency) {
-            <mat-option [value]="currency">{{ currency }}</mat-option>
+      <div class="wallet-card">
+        <div class="wallet-header">
+          <p class="wallet-eyebrow">Total Balance</p>
+          <div class="currency-compact">
+            {{ globalCurrency() }}
+            <select [ngModel]="globalCurrency()" (ngModelChange)="setGlobalCurrency($event)" class="currency-select" aria-label="Global currency">
+              @for (currency of currencies; track currency) {
+                <option [value]="currency">{{ currency }}</option>
+              }
+            </select>
+            <mat-icon>expand_more</mat-icon>
+          </div>
+        </div>
+
+        <div class="wallet-balance">
+          @if (dashboard().totalYouAreOwedUsdMicros - dashboard().totalYouOweUsdMicros > 0) {
+            <h1>{{ money(dashboard().totalYouAreOwedUsdMicros - dashboard().totalYouOweUsdMicros) }}</h1>
+            <p class="balance-status">You are owed in total</p>
+          } @else if (dashboard().totalYouAreOwedUsdMicros - dashboard().totalYouOweUsdMicros < 0) {
+            <h1>{{ money(dashboard().totalYouOweUsdMicros - dashboard().totalYouAreOwedUsdMicros) }}</h1>
+            <p class="balance-status">You owe in total</p>
+          } @else {
+            <h1>{{ money(0) }}</h1>
+            <p class="balance-status">Settled up</p>
           }
-        </mat-select>
-      </mat-form-field>
-      <div class="quick-actions">
-        <button mat-flat-button color="primary" type="button" (click)="openAddExpense()">
-          <mat-icon>add</mat-icon>
-          Add expense
+        </div>
+
+        <div class="wallet-metrics">
+          <div class="metric-pill positive-bg">
+            <mat-icon class="metric-icon">arrow_downward</mat-icon>
+            <div class="metric-info">
+              <span class="metric-label">Owed to you</span>
+              <span class="metric-value">{{ money(dashboard().totalYouAreOwedUsdMicros) }}</span>
+            </div>
+          </div>
+          <div class="metric-pill negative-bg">
+            <mat-icon class="metric-icon">arrow_upward</mat-icon>
+            <div class="metric-info">
+              <span class="metric-label">You owe</span>
+              <span class="metric-value">{{ money(dashboard().totalYouOweUsdMicros) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-grid">
+        <button class="action-btn primary-action" type="button" (click)="openAddExpense()">
+          <div class="icon-circle primary-icon">
+            <mat-icon>add</mat-icon>
+          </div>
+          <span>Add expense</span>
         </button>
-        <button mat-stroked-button type="button" (click)="openAddFriend()">
-          <mat-icon>person_add</mat-icon>
-          Add friend
+        <button class="action-btn" type="button" (click)="openAddFriend()">
+          <div class="icon-circle">
+            <mat-icon>person_add</mat-icon>
+          </div>
+          <span>Add friend</span>
         </button>
-        <button mat-stroked-button type="button" (click)="openCreateGroup()">
-          <mat-icon>group_add</mat-icon>
-          Create group
+        <button class="action-btn" type="button" (click)="openCreateGroup()">
+          <div class="icon-circle">
+            <mat-icon>group_add</mat-icon>
+          </div>
+          <span>Create group</span>
         </button>
       </div>
     </section>
@@ -66,7 +103,6 @@
                   {{ balanceText(friend.netUsdMicros) }}
                 </span>
               </a>
-              <mat-divider />
             } @empty {
               <p class="empty-state">Add friends by phone number to start splitting expenses.</p>
             }
@@ -90,7 +126,6 @@
                   {{ groupText(group.netUsdMicros) }}
                 </span>
               </a>
-              <mat-divider />
             }
           </mat-nav-list>
         </mat-tab>

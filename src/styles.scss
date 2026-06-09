@@ -209,6 +209,8 @@ body {
   background: var(--dutch-page);
   color: var(--dutch-text);
   font-family: var(--dutch-font-sans);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 button,

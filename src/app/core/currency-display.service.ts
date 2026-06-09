@@ -28,7 +28,7 @@ export class CurrencyDisplayService {
     const scale = currencyMinorUnits(currency);
     const symbol = CURRENCY_SYMBOLS[currency] ?? `${currency} `;
 
-    return `${symbol}${amount.toFixed(scale)} ${currency}`;
+    return `${symbol}${amount.toFixed(scale)}`;
   }
 }
 

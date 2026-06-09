@@ -78,38 +78,223 @@
   padding: 1rem;
 }
 
-.eyebrow {
-  margin: 0 0 0.5rem;
-  color: var(--dutch-muted);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  text-transform: uppercase;
+/* --- Wallet Card --- */
+.wallet-card {
+  background: linear-gradient(135deg, var(--dutch-primary-strong), var(--dutch-primary));
+  border-radius: 1rem;
+  padding: 1.5rem;
+  color: white;
+  box-shadow: 0 10px 25px -5px color-mix(in srgb, var(--dutch-primary) 40%, transparent);
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
 }
 
-h1 {
-  margin: 0;
-  color: var(--dutch-text);
-  font-size: clamp(2rem, 7vw, 3.5rem);
-  line-height: 1.05;
+.wallet-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, color-mix(in srgb, white 20%, transparent), transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
-.balance-row,
-.quick-actions {
+.wallet-header {
   display: flex;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.wallet-eyebrow {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: color-mix(in srgb, white 80%, transparent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.currency-compact {
+  display: inline-flex;
+  align-items: center;
+  background: color-mix(in srgb, white 20%, transparent);
+  border-radius: 999px;
+  padding: 0.25rem 0.5rem 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+  position: relative;
+  cursor: pointer;
+}
+
+.currency-compact mat-icon {
+  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
+  margin-left: 0.25rem;
+}
+
+.currency-select {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: white;
+  font-weight: 700;
+  outline: none;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+
+.currency-select option {
+  color: var(--dutch-text);
+  background: var(--dutch-surface);
+}
+
+.wallet-balance {
+  margin-bottom: 1.5rem;
+}
+
+.wallet-balance h1 {
+  margin: 0 0 0.25rem;
+  color: white;
+  font-size: clamp(2.5rem, 8vw, 3.5rem);
+  line-height: 1.1;
+  word-break: break-word;
+}
+
+.balance-status {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: color-mix(in srgb, white 90%, transparent);
+}
+
+.wallet-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
-  margin-top: 1rem;
 }
 
-.quick-actions button {
-  --mat-button-outlined-label-text-color: var(--dutch-secondary);
-  --mat-button-outlined-outline-color: color-mix(in srgb, var(--dutch-secondary) 42%, white);
-  --mat-button-outlined-state-layer-color: var(--dutch-secondary);
+.metric-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, white 15%, transparent);
+  backdrop-filter: blur(4px);
 }
 
-.currency-field {
-  width: min(100%, 15rem);
-  margin-top: 1rem;
+.metric-icon {
+  background: white;
+  color: var(--dutch-primary);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.metric-icon.mat-icon {
+  font-size: 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  line-height: 1.25rem;
+}
+
+.metric-pill.positive-bg .metric-icon {
+  color: var(--dutch-positive-strong);
+}
+
+.metric-pill.negative-bg .metric-icon {
+  color: var(--dutch-negative-strong);
+}
+
+.metric-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  color: color-mix(in srgb, white 80%, transparent);
+}
+
+.metric-value {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: white;
+  word-break: break-word;
+}
+
+/* --- Action Grid --- */
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.action-btn {
+  background: transparent;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: var(--dutch-text);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  border-radius: 0.5rem;
+  transition: background 0.2s ease;
+}
+
+.action-btn:hover,
+.action-btn:focus-visible {
+  background: var(--dutch-subtle);
+  outline: none;
+}
+
+.icon-circle {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1rem;
+  background: var(--dutch-subtle);
+  border: 1px solid var(--dutch-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dutch-secondary);
+  transition: all 0.2s ease;
+}
+
+.icon-circle mat-icon {
+  font-size: 1.75rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  line-height: 1.75rem;
+}
+
+.primary-action .icon-circle {
+  background: var(--dutch-primary-soft);
+  border-color: var(--dutch-primary-container);
+  color: var(--dutch-primary);
+}
+
+.action-btn:hover .icon-circle {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.05);
 }
 
 .positive {
@@ -120,8 +305,12 @@ h1 {
   color: var(--dutch-negative);
 }
 
-.entity-list {
-  padding: 0.25rem 0;
+.entity-list,
+.activity-list {
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .group-overview {
@@ -170,13 +359,26 @@ h1 {
   margin-top: 0.125rem;
 }
 
-.entity-list a {
+.entity-list a,
+.activity-list mat-list-item {
   min-height: 4.5rem;
-  border-radius: 0;
+  border-radius: 0.75rem !important;
+  background: var(--dutch-subtle);
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  margin-bottom: 0 !important;
+}
+
+.entity-list a:hover,
+.activity-list mat-list-item:hover {
+  background: var(--dutch-surface);
+  border-color: var(--dutch-border);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.05);
+  transform: translateY(-1px);
 }
 
 .entity-list a[mat-list-item] {
-  border-radius: 0;
+  border-radius: 0.75rem !important;
 }
 
 .avatar {
@@ -215,9 +417,19 @@ h1 {
 .activity-card {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 0.75rem;
-  border-bottom: 1px solid var(--dutch-border);
-  padding: 0.875rem 0;
+  gap: 1rem;
+  background: var(--dutch-subtle);
+  border: 1px solid var(--dutch-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.activity-card:hover {
+  background: var(--dutch-surface);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.05);
+  transform: translateY(-1px);
 }
 
 .activity-card p {
@@ -255,5 +467,19 @@ h1 {
 
   .desktop-activity {
     display: block;
+  }
+}
+
+:host-context(html[data-theme='dark']) {
+  .wallet-card {
+    background: linear-gradient(135deg, var(--dutch-primary-soft), var(--dutch-primary-container));
+    box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.5);
+  }
+
+  .entity-list a:hover,
+  .activity-list mat-list-item:hover,
+  .activity-card:hover {
+    background: color-mix(in srgb, var(--dutch-subtle) 90%, white);
+    border-color: color-mix(in srgb, var(--dutch-border) 80%, white);
   }
 }
